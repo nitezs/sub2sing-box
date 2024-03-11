@@ -17,12 +17,13 @@ import (
 
 var convertCmd = &cobra.Command{
 	Use:   "convert",
-	Long:  "Convert common proxy format to json",
-	Short: "Convert common proxy format to json",
+	Long:  "Convert common proxy to sing-box proxy",
+	Short: "Convert common proxy to sing-box proxy",
 	Run: func(cmd *cobra.Command, args []string) {
 		subscriptions, _ := cmd.Flags().GetStringSlice("subscription")
 		proxies, _ := cmd.Flags().GetStringSlice("proxy")
 		template, _ := cmd.Flags().GetString("template")
+		output, _ := cmd.Flags().GetString("output")
 		if template == "" {
 			proxyList, err := ConvertSubscriptionsToSProxy(subscriptions)
 			if err != nil {
@@ -42,7 +43,15 @@ var convertCmd = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
-			fmt.Println(string(result))
+			if output != "" {
+				err = os.WriteFile(output, result, 0666)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			} else {
+				fmt.Println(string(result))
+			}
 		} else {
 			config, err := ConvertWithTemplate(subscriptions, proxies, template)
 			if err != nil {
@@ -54,7 +63,15 @@ var convertCmd = &cobra.Command{
 				fmt.Println(err)
 				return
 			}
-			fmt.Println(string(data))
+			if output != "" {
+				err = os.WriteFile(output, data, 0666)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			} else {
+				fmt.Println(string(data))
+			}
 		}
 	},
 }
@@ -63,6 +80,7 @@ func init() {
 	convertCmd.Flags().StringSliceP("subscription", "s", []string{}, "subscription urls")
 	convertCmd.Flags().StringSliceP("proxy", "p", []string{}, "common proxies")
 	convertCmd.Flags().StringP("template", "t", "", "path of template file")
+	convertCmd.Flags().StringP("output", "o", "", "output file path")
 	RootCmd.AddCommand(convertCmd)
 }
 
