@@ -3,6 +3,7 @@ package util
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -13,6 +14,87 @@ import (
 	"sub2sing-box/internal/model"
 	"sub2sing-box/pkg/parser"
 )
+
+func Convert(subscriptions []string, proxies []string, template string, delete string, rename map[string]string) (string, error) {
+	result := ""
+	var err error
+
+	proxyList, err := ConvertSubscriptionsToSProxy(subscriptions)
+	if err != nil {
+		return "", err
+	}
+	for _, proxy := range proxies {
+		p, err := ConvertCProxyToSProxy(proxy)
+		if err != nil {
+			return "", err
+		}
+		proxyList = append(proxyList, p)
+	}
+
+	if delete != "" {
+		proxyList, err = DeleteProxy(proxyList, delete)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	for k, v := range rename {
+		proxyList, err = RenameProxy(proxyList, k, v)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	keep := make(map[int]bool)
+	set := make(map[string]struct {
+		Proxy model.Proxy
+		Count int
+	})
+	for i, p := range proxyList {
+		if _, exists := set[p.Tag]; !exists {
+			keep[i] = true
+			set[p.Tag] = struct {
+				Proxy model.Proxy
+				Count int
+			}{p, 0}
+		} else {
+			p1, _ := json.Marshal(p)
+			p2, _ := json.Marshal(set[p.Tag])
+			if string(p1) != string(p2) {
+				set[p.Tag] = struct {
+					Proxy model.Proxy
+					Count int
+				}{p, set[p.Tag].Count + 1}
+				keep[i] = true
+				proxyList[i].Tag = fmt.Sprintf("%s %d", p.Tag, set[p.Tag].Count)
+			} else {
+				keep[i] = false
+			}
+		}
+	}
+	var newProxyList []model.Proxy
+	for i, p := range proxyList {
+		if keep[i] {
+			newProxyList = append(newProxyList, p)
+		}
+	}
+	proxyList = newProxyList
+
+	if template != "" {
+		result, err = MergeTemplate(proxyList, template)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		r, err := json.Marshal(proxyList)
+		result = string(r)
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return string(result), nil
+}
 
 func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
 	config, err := ReadTemplate(template)
