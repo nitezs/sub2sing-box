@@ -16,6 +16,17 @@ Flags:
   -t, --template string         template file path
 ```
 
+```
+Run the server
+
+Usage:
+   server [flags]
+
+Flags:
+  -h, --help          help for server
+  -p, --port uint16   server port (default 8080)
+```
+
 ## Template
 
 Template 中使用 `<all-proxy-tags>` 指明节点插入位置，例如
