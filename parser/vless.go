@@ -48,15 +48,13 @@ func ParseVless(proxy string) (model.Proxy, error) {
 	}
 	server := strings.TrimSpace(serverAndPort[0])
 	uuid := strings.TrimSpace(parts[0])
-	network := params.Get("type")
 	result := model.Proxy{
 		Type: "vless",
+		Tag:  remarks,
 		VLESS: model.VLESS{
-			Tag:        remarks,
 			Server:     server,
 			ServerPort: uint16(port),
 			UUID:       uuid,
-			Network:    network,
 			Flow:       params.Get("flow"),
 		},
 	}

@@ -40,8 +40,8 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 	password := strings.TrimSpace(parts[0])
 	result := model.Proxy{
 		Type: "trojan",
+		Tag:  remarks,
 		Trojan: model.Trojan{
-			Tag:        remarks,
 			Server:     server,
 			ServerPort: uint16(port),
 			Password:   password,

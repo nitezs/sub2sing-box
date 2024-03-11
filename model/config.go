@@ -91,7 +91,7 @@ type DNSRule struct {
 	Type                     string            `json:"type,omitempty"`
 	Inbound                  Listable[string]  `json:"inbound,omitempty"`
 	IPVersion                int               `json:"ip_version,omitempty"`
-	QueryType                Listable[uint16]  `json:"query_type,omitempty"`
+	QueryType                Listable[string]  `json:"query_type,omitempty"`
 	Network                  Listable[string]  `json:"network,omitempty"`
 	AuthUser                 Listable[string]  `json:"auth_user,omitempty"`
 	Protocol                 Listable[string]  `json:"protocol,omitempty"`
@@ -126,7 +126,7 @@ type DNSRule struct {
 	DisableCache             bool              `json:"disable_cache,omitempty"`
 	RewriteTTL               uint32            `json:"rewrite_ttl,omitempty"`
 	ClientSubnet             string            `json:"client_subnet,omitempty"`
-	Mode                     string            `json:"mode"`
+	Mode                     string            `json:"mode,omitempty"`
 	Rules                    Listable[DNSRule] `json:"rules,omitempty"`
 }
 

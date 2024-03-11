@@ -50,14 +50,10 @@ func ParseShadowsocks(proxy string) (model.Proxy, error) {
 	method := credentials[0]
 	password := credentials[1]
 	server := strings.TrimSpace(serverAndPort[0])
-	// params, err := url.ParseQuery(proxy)
-	// if err != nil {
-	// 	return model.Proxy{}, err
-	// }
 	result := model.Proxy{
 		Type: "shadowsocks",
+		Tag:  remarks,
 		Shadowsocks: model.Shadowsocks{
-			Tag:        remarks,
 			Method:     method,
 			Password:   password,
 			Server:     server,

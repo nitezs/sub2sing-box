@@ -6,8 +6,6 @@ type Hysteria2Obfs struct {
 }
 
 type Hysteria2 struct {
-	Type        string              `json:"type"`
-	Tag         string              `json:"tag,omitempty"`
 	Server      string              `json:"server"`
 	ServerPort  uint16              `json:"server_port"`
 	UpMbps      int                 `json:"up_mbps,omitempty"`

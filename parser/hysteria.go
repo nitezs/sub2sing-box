@@ -63,8 +63,8 @@ func ParseHysteria(proxy string) (model.Proxy, error) {
 	}
 	result := model.Proxy{
 		Type: "hysteria",
+		Tag:  remarks,
 		Hysteria: model.Hysteria{
-			Tag:        remarks,
 			Server:     host,
 			ServerPort: uint16(port),
 			Up:         upmbps,

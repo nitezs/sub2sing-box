@@ -54,8 +54,8 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 
 	result := model.Proxy{
 		Type: "vmess",
+		Tag:  name,
 		VMess: model.VMess{
-			Tag:        name,
 			Server:     vmess.Add,
 			ServerPort: uint16(port),
 			UUID:       vmess.Id,

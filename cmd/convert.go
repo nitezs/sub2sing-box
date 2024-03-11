@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
+//TODO: 过滤、去重、分组、排序
+
 var convertCmd = &cobra.Command{
 	Use:   "convert",
 	Long:  "Convert common proxy to sing-box proxy",
@@ -24,63 +26,57 @@ var convertCmd = &cobra.Command{
 		proxies, _ := cmd.Flags().GetStringSlice("proxy")
 		template, _ := cmd.Flags().GetString("template")
 		output, _ := cmd.Flags().GetString("output")
-		if template == "" {
-			proxyList, err := ConvertSubscriptionsToSProxy(subscriptions)
+		result := ""
+		var err error
+
+		proxyList, err := ConvertSubscriptionsToSProxy(subscriptions)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		for _, proxy := range proxies {
+			p, err := ConvertCProxyToSProxy(proxy)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
-			for _, p := range proxies {
-				result, err := ConvertCProxyToSProxy(p)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-				proxyList = append(proxyList, result)
-			}
-			result, err := json.Marshal(proxyList)
+			proxyList = append(proxyList, p)
+		}
+
+		if template != "" {
+			result, err = MergeTemplate(proxyList, template)
 			if err != nil {
 				fmt.Println(err)
 				return
-			}
-			if output != "" {
-				err = os.WriteFile(output, result, 0666)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-			} else {
-				fmt.Println(string(result))
 			}
 		} else {
-			config, err := ConvertWithTemplate(subscriptions, proxies, template)
+			r, err := json.Marshal(proxyList)
+			result = string(r)
 			if err != nil {
 				fmt.Println(err)
 				return
-			}
-			data, err := json.Marshal(config)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-			if output != "" {
-				err = os.WriteFile(output, data, 0666)
-				if err != nil {
-					fmt.Println(err)
-					return
-				}
-			} else {
-				fmt.Println(string(data))
 			}
 		}
+
+		if output != "" {
+			err = os.WriteFile(output, []byte(result), 0666)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+		} else {
+			fmt.Println(string(result))
+		}
+
 	},
 }
 
 func init() {
 	convertCmd.Flags().StringSliceP("subscription", "s", []string{}, "subscription urls")
 	convertCmd.Flags().StringSliceP("proxy", "p", []string{}, "common proxies")
-	convertCmd.Flags().StringP("template", "t", "", "path of template file")
+	convertCmd.Flags().StringP("template", "t", "", "template file path")
 	convertCmd.Flags().StringP("output", "o", "", "output file path")
+	convertCmd.Flags().StringP("filter", "f", "", "outbound tag filter (support regex)")
 	RootCmd.AddCommand(convertCmd)
 }
 
@@ -101,44 +97,31 @@ func Convert(urls []string, proxies []string) ([]model.Proxy, error) {
 	return proxyList, nil
 }
 
-func ConvertWithTemplate(urls []string, proxies []string, template string) (model.Config, error) {
-	proxyList := make([]model.Proxy, 0)
-	newProxies, err := ConvertSubscriptionsToSProxy(urls)
-	newOutboundTagList := make([]string, 0)
-	if err != nil {
-		return model.Config{}, err
-	}
-	proxyList = append(proxyList, newProxies...)
-	for _, p := range proxies {
-		proxy, err := ConvertCProxyToSProxy(p)
-		if err != nil {
-			return model.Config{}, err
-		}
-		proxyList = append(proxyList, proxy)
-	}
+func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
 	config, err := ReadTemplate(template)
+	proxyTags := make([]string, 0)
 	if err != nil {
-		return model.Config{}, err
+		return "", err
 	}
-	ps, err := json.Marshal(proxyList)
+	for _, p := range proxies {
+		proxyTags = append(proxyTags, p.Tag)
+	}
+	ps, err := json.Marshal(&proxies)
+	fmt.Print(string(ps))
 	if err != nil {
-		return model.Config{}, err
+		return "", err
 	}
 	var newOutbounds []model.Outbound
 	err = json.Unmarshal(ps, &newOutbounds)
 	if err != nil {
-		return model.Config{}, err
+		return "", err
 	}
-	for _, outbound := range newOutbounds {
-		newOutboundTagList = append(newOutboundTagList, outbound.Tag)
-	}
-	config.Outbounds = append(config.Outbounds, newOutbounds...)
 	for i, outbound := range config.Outbounds {
 		if outbound.Type == "urltest" || outbound.Type == "selector" {
 			var parsedOutbound []string = make([]string, 0)
 			for _, o := range outbound.Outbounds {
 				if o == "<all-proxy-tags>" {
-					parsedOutbound = append(parsedOutbound, newOutboundTagList...)
+					parsedOutbound = append(parsedOutbound, proxyTags...)
 				} else {
 					parsedOutbound = append(parsedOutbound, o)
 				}
@@ -146,7 +129,12 @@ func ConvertWithTemplate(urls []string, proxies []string, template string) (mode
 			config.Outbounds[i].Outbounds = parsedOutbound
 		}
 	}
-	return config, nil
+	config.Outbounds = append(config.Outbounds, newOutbounds...)
+	data, err := json.Marshal(config)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
 
 func ConvertCProxyToSProxy(proxy string) (model.Proxy, error) {
@@ -180,13 +168,11 @@ func FetchSubscription(url string, maxRetryTime int) (string, error) {
 	for retryTime < maxRetryTime {
 		resp, err := http.Get(url)
 		if err != nil {
-			fmt.Println(err)
 			retryTime++
 			continue
 		}
 		data, err := io.ReadAll(resp.Body)
 		if err != nil {
-			fmt.Println(err)
 			retryTime++
 			continue
 		}
@@ -200,12 +186,10 @@ func ConvertSubscriptionsToSProxy(urls []string) ([]model.Proxy, error) {
 	for _, url := range urls {
 		data, err := FetchSubscription(url, 3)
 		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 		proxy, err := DecodeBase64(data)
 		if err != nil {
-			fmt.Println(err)
 			return nil, err
 		}
 		proxies := strings.Split(proxy, "\n")

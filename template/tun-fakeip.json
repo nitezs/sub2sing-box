@@ -161,7 +161,7 @@
     "outbounds": [
         {
             "type": "selector",
-            "tag": "手动切换",
+            "tag": "节点选择",
             "outbounds": ["<all-proxy-tags>", "direct"],
             "interrupt_exist_connections": true
         },
@@ -175,35 +175,35 @@
         {
             "type": "selector",
             "tag": "Microsoft",
-            "outbounds": ["节点选择", "手动切换", "<all-proxy-tags>", "direct"],
+            "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
             "default": "节点选择",
             "interrupt_exist_connections": true
         },
         {
             "type": "selector",
             "tag": "Bilibili",
-            "outbounds": ["节点选择", "手动切换", "<all-proxy-tags>", "direct"],
+            "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
             "default": "节点选择",
             "interrupt_exist_connections": true
         },
         {
             "type": "selector",
             "tag": "Games(全球)",
-            "outbounds": ["节点选择", "手动切换", "<all-proxy-tags>", "direct"],
+            "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
             "default": "节点选择",
             "interrupt_exist_connections": true
         },
         {
             "type": "selector",
             "tag": "Games(中国)",
-            "outbounds": ["节点选择", "手动切换", "<all-proxy-tags>", "direct"],
+            "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
             "default": "节点选择",
             "interrupt_exist_connections": true
         },
         {
             "type": "selector",
             "tag": "Bahamut",
-            "outbounds": ["节点选择", "手动切换", "<all-proxy-tags>", "direct"],
+            "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
             "default": "节点选择",
             "interrupt_exist_connections": true
         },
@@ -228,7 +228,7 @@
         "clash_api": {
             "external_controller": "127.0.0.1:9090",
             "external_ui": "./ui",
-            "external_ui_download_detour": "手动切换"
+            "external_ui_download_detour": "节点选择"
         }
     }
 }

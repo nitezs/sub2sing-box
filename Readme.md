@@ -13,5 +13,5 @@ Flags:
   -o, --output string          output file path
   -p, --proxy strings          common proxies
   -s, --subscription strings   subscription urls
-  -t, --template string        path of template file
+  -t, --template string        template file path
 ```
