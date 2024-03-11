@@ -1,4 +1,4 @@
-.vscode
+.vscode/launch.json
 dist
 *test.go
 template.json
