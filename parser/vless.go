@@ -57,33 +57,68 @@ func ParseVless(proxy string) (model.Proxy, error) {
 			ServerPort: uint16(port),
 			UUID:       uuid,
 			Network:    network,
-			TLS: &model.OutboundTLSOptions{
-				Enabled:    params.Get("security") == "reality",
-				ServerName: params.Get("sni"),
-				UTLS: &model.OutboundUTLSOptions{
-					Enabled:     params.Get("fp") != "",
-					Fingerprint: params.Get("fp"),
-				},
-				Reality: &model.OutboundRealityOptions{
-					Enabled:   params.Get("pbk") != "",
-					PublicKey: params.Get("pbk"),
-					ShortID:   params.Get("sid"),
-				},
-				ALPN: strings.Split(params.Get("alpn"), ","),
-			},
-			Transport: &model.V2RayTransportOptions{
-				WebsocketOptions: model.V2RayWebsocketOptions{
-					Path: params.Get("path"),
-					Headers: map[string]string{
-						"Host": params.Get("host"),
-					},
-				},
-				GRPCOptions: model.V2RayGRPCOptions{
-					ServiceName: params.Get("serviceName"),
-				},
-			},
-			Flow: params.Get("flow"),
+			Flow:       params.Get("flow"),
 		},
+	}
+	if params.Get("security") == "tls" {
+		result.VLESS.TLS = &model.OutboundTLSOptions{
+			Enabled:  true,
+			ALPN:     strings.Split(params.Get("alpn"), ","),
+			Insecure: params.Get("allowInsecure") == "1",
+		}
+	}
+	if params.Get("security") == "reality" {
+		result.VLESS.TLS = &model.OutboundTLSOptions{
+			Enabled:    true,
+			ServerName: params.Get("sni"),
+			UTLS: &model.OutboundUTLSOptions{
+				Enabled:     params.Get("fp") != "",
+				Fingerprint: params.Get("fp"),
+			},
+			Reality: &model.OutboundRealityOptions{
+				Enabled:   true,
+				PublicKey: params.Get("pbk"),
+				ShortID:   params.Get("sid"),
+			},
+			ALPN: strings.Split(params.Get("alpn"), ","),
+		}
+	}
+	if params.Get("type") == "ws" {
+		result.VLESS.Transport = &model.V2RayTransportOptions{
+			Type: "ws",
+			WebsocketOptions: model.V2RayWebsocketOptions{
+				Path: params.Get("path"),
+				Headers: map[string]string{
+					"Host": params.Get("host"),
+				},
+			},
+		}
+	}
+	if params.Get("type") == "quic" {
+		result.VLESS.Transport = &model.V2RayTransportOptions{
+			Type:        "quic",
+			QUICOptions: model.V2RayQUICOptions{},
+		}
+	}
+	if params.Get("type") == "grpc" {
+		result.VLESS.Transport = &model.V2RayTransportOptions{
+			Type: "grpc",
+			GRPCOptions: model.V2RayGRPCOptions{
+				ServiceName: params.Get("serviceName"),
+			},
+		}
+	}
+	if params.Get("type") == "http" {
+		host, err := url.QueryUnescape(params.Get("host"))
+		if err != nil {
+			return model.Proxy{}, err
+		}
+		result.VLESS.Transport = &model.V2RayTransportOptions{
+			Type: "http",
+			HTTPOptions: model.V2RayHTTPOptions{
+				Host: strings.Split(host, ","),
+			},
+		}
 	}
 	return result, nil
 }

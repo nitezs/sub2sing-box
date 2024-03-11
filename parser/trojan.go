@@ -44,13 +44,65 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 			Tag:        remarks,
 			Server:     server,
 			ServerPort: uint16(port),
-			TLS: &model.OutboundTLSOptions{
-				Enabled:    true,
-				ServerName: params.Get("sni"),
-			},
-			Password: password,
-			Network:  "tcp",
+			Password:   password,
+			Network:    params.Get("type"),
 		},
+	}
+	if params.Get("security") == "xtls" || params.Get("security") == "tls" {
+		result.Trojan.TLS = &model.OutboundTLSOptions{
+			Enabled:    true,
+			ALPN:       strings.Split(params.Get("alpn"), ","),
+			ServerName: params.Get("sni"),
+		}
+	}
+	if params.Get("security") == "reality" {
+		result.Trojan.TLS = &model.OutboundTLSOptions{
+			Enabled:    true,
+			ServerName: params.Get("sni"),
+			Reality: &model.OutboundRealityOptions{
+				Enabled:   true,
+				PublicKey: params.Get("pbk"),
+				ShortID:   params.Get("sid"),
+			},
+			UTLS: &model.OutboundUTLSOptions{
+				Enabled:     params.Get("fp") != "",
+				Fingerprint: params.Get("fp"),
+			},
+		}
+	}
+	if params.Get("type") == "ws" {
+		result.Trojan.Transport = &model.V2RayTransportOptions{
+			Type: "ws",
+			WebsocketOptions: model.V2RayWebsocketOptions{
+				Path: params.Get("path"),
+				Headers: map[string]string{
+					"Host": params.Get("host"),
+				},
+			},
+		}
+	}
+	if params.Get("type") == "http" {
+		result.Trojan.Transport = &model.V2RayTransportOptions{
+			Type: "http",
+			HTTPOptions: model.V2RayHTTPOptions{
+				Host: []string{params.Get("host")},
+				Path: params.Get("path"),
+			},
+		}
+	}
+	if params.Get("type") == "quic" {
+		result.Trojan.Transport = &model.V2RayTransportOptions{
+			Type:        "quic",
+			QUICOptions: model.V2RayQUICOptions{},
+		}
+	}
+	if params.Get("type") == "grpc" {
+		result.Trojan.Transport = &model.V2RayTransportOptions{
+			Type: "grpc",
+			GRPCOptions: model.V2RayGRPCOptions{
+				ServiceName: params.Get("serviceName"),
+			},
+		}
 	}
 	return result, nil
 }

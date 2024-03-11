@@ -31,10 +31,6 @@ func ParseHysteria2(proxy string) (model.Proxy, error) {
 		return model.Proxy{}, errors.New("invalid hysteria2 Url")
 	}
 	remarks := params.Get("name")
-	certificate := make([]string, 0)
-	if params.Get("pinSHA256") != "" {
-		certificate = append(certificate, params.Get("pinSHA256"))
-	}
 	server := serverAndPort[0]
 	password := parts[0]
 	network := params.Get("network")
@@ -53,7 +49,7 @@ func ParseHysteria2(proxy string) (model.Proxy, error) {
 				Enabled:     params.Get("pinSHA256") != "",
 				Insecure:    params.Get("insecure") == "1",
 				ServerName:  params.Get("sni"),
-				Certificate: certificate,
+				Certificate: []string{params.Get("pinSHA256")},
 			},
 			Network: network,
 		},
