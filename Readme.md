@@ -7,11 +7,13 @@ Usage:
    convert [flags]
 
 Flags:
-  -h, --help                   help for convert
-  -o, --output string          output file path
-  -p, --proxy strings          common proxies
-  -s, --subscription strings   subscription urls
-  -t, --template string        template file path
+  -d, --delete string           delete proxy with regex
+  -h, --help                    help for convert
+  -o, --output string           output file path
+  -p, --proxy strings           common proxies
+  -r, --rename stringToString   rename proxy with regex (default [])
+  -s, --subscription strings    subscription urls
+  -t, --template string         template file path
 ```
 
 ## Template
