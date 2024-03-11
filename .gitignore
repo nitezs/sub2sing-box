@@ -1,4 +1,5 @@
 .vscode/launch.json
+.vscode/settings.json
 dist
 *test.go
 template.json
