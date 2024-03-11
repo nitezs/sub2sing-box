@@ -1,3 +1,4 @@
 .vscode
 dist
 *test.go
+template.json

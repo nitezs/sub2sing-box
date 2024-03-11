@@ -24,12 +24,25 @@ var convertCmd = &cobra.Command{
 		proxies, _ := cmd.Flags().GetStringSlice("proxy")
 		template, _ := cmd.Flags().GetString("template")
 		if template == "" {
-			result, err := ConvertSubscriptionsToJson(subscriptions)
+			proxyList, err := ConvertSubscriptionsToSProxy(subscriptions)
 			if err != nil {
 				fmt.Println(err)
 				return
 			}
-			fmt.Println(result)
+			for _, p := range proxies {
+				result, err := ConvertCProxyToSProxy(p)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+				proxyList = append(proxyList, result)
+			}
+			result, err := json.Marshal(proxyList)
+			if err != nil {
+				fmt.Println(err)
+				return
+			}
+			fmt.Println(string(result))
 		} else {
 			config, err := ConvertWithTemplate(subscriptions, proxies, template)
 			if err != nil {
@@ -73,6 +86,7 @@ func Convert(urls []string, proxies []string) ([]model.Proxy, error) {
 func ConvertWithTemplate(urls []string, proxies []string, template string) (model.Config, error) {
 	proxyList := make([]model.Proxy, 0)
 	newProxies, err := ConvertSubscriptionsToSProxy(urls)
+	newOutboundTagList := make([]string, 0)
 	if err != nil {
 		return model.Config{}, err
 	}
@@ -97,7 +111,23 @@ func ConvertWithTemplate(urls []string, proxies []string, template string) (mode
 	if err != nil {
 		return model.Config{}, err
 	}
+	for _, outbound := range newOutbounds {
+		newOutboundTagList = append(newOutboundTagList, outbound.Tag)
+	}
 	config.Outbounds = append(config.Outbounds, newOutbounds...)
+	for i, outbound := range config.Outbounds {
+		if outbound.Type == "urltest" || outbound.Type == "selector" {
+			var parsedOutbound []string = make([]string, 0)
+			for _, o := range outbound.Outbounds {
+				if o == "<all-proxy-tags>" {
+					parsedOutbound = append(parsedOutbound, newOutboundTagList...)
+				} else {
+					parsedOutbound = append(parsedOutbound, o)
+				}
+			}
+			config.Outbounds[i].Outbounds = parsedOutbound
+		}
+	}
 	return config, nil
 }
 
