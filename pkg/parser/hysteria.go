@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/model"
+	"sub2sing-box/internal/model"
 )
 
 //hysteria://host:port?protocol=udp&auth=123456&peer=sni.domain&insecure=1&upmbps=100&downmbps=100&alpn=hysteria&obfs=xplus&obfsParam=123456#remarks

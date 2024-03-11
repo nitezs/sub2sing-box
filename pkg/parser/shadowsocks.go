@@ -5,8 +5,8 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/model"
-	. "sub2sing-box/util"
+	"sub2sing-box/internal"
+	"sub2sing-box/internal/model"
 )
 
 func ParseShadowsocks(proxy string) (model.Proxy, error) {
@@ -18,7 +18,7 @@ func ParseShadowsocks(proxy string) (model.Proxy, error) {
 		return model.Proxy{}, errors.New("invalid ss Url")
 	}
 	if !strings.Contains(parts[0], ":") {
-		decoded, err := DecodeBase64(parts[0])
+		decoded, err := internal.DecodeBase64(parts[0])
 		if err != nil {
 			return model.Proxy{}, errors.New("invalid ss Url" + err.Error())
 		}

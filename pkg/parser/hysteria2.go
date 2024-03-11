@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/model"
+	"sub2sing-box/internal/model"
 )
 
 // hysteria2://letmein@example.com/?insecure=1&obfs=salamander&obfs-password=gawrgura&pinSHA256=deadbeef&sni=real.example.com

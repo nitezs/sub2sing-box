@@ -1,7 +1,5 @@
 # sub2sing-box
 
-## 使用指南
-
 ```
 Convert common proxy to sing-box proxy
 
@@ -14,4 +12,17 @@ Flags:
   -p, --proxy strings          common proxies
   -s, --subscription strings   subscription urls
   -t, --template string        template file path
+```
+
+## Template
+
+Template 中使用 `<all-proxy-tags>` 指明节点插入位置，例如
+
+```
+{
+  "type": "selector",
+  "tag": "节点选择",
+  "outbounds": ["<all-proxy-tags>", "direct"],
+  "interrupt_exist_connections": true
+},
 ```

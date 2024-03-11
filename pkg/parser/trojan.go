@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/model"
+	"sub2sing-box/internal/model"
 )
 
 func ParseTrojan(proxy string) (model.Proxy, error) {
