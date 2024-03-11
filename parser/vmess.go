@@ -61,7 +61,6 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 			UUID:       vmess.Id,
 			AlterId:    aid,
 			Security:   vmess.Scy,
-			Network:    vmess.Net,
 		},
 	}
 

@@ -1,7 +1,5 @@
 package model
 
-type NetworkList string
-
 type Shadowsocks struct {
 	Tag           string                    `json:"tag,omitempty"`
 	Server        string                    `json:"server"`

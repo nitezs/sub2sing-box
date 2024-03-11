@@ -57,8 +57,8 @@ type V2RayHTTPOptions struct {
 	Path        string            `json:"path,omitempty"`
 	Method      string            `json:"method,omitempty"`
 	Headers     map[string]string `json:"headers,omitempty"`
-	IdleTimeout Duration          `json:"idle_timeout,omitempty"`
-	PingTimeout Duration          `json:"ping_timeout,omitempty"`
+	IdleTimeout string            `json:"idle_timeout,omitempty"`
+	PingTimeout string            `json:"ping_timeout,omitempty"`
 }
 
 type V2RayWebsocketOptions struct {
@@ -71,11 +71,11 @@ type V2RayWebsocketOptions struct {
 type V2RayQUICOptions struct{}
 
 type V2RayGRPCOptions struct {
-	ServiceName         string   `json:"service_name,omitempty"`
-	IdleTimeout         Duration `json:"idle_timeout,omitempty"`
-	PingTimeout         Duration `json:"ping_timeout,omitempty"`
-	PermitWithoutStream bool     `json:"permit_without_stream,omitempty"`
-	ForceLite           bool     `json:"-"` // for test
+	ServiceName         string `json:"service_name,omitempty"`
+	IdleTimeout         string `json:"idle_timeout,omitempty"`
+	PingTimeout         string `json:"ping_timeout,omitempty"`
+	PermitWithoutStream bool   `json:"permit_without_stream,omitempty"`
+	ForceLite           bool   `json:"-"` // for test
 }
 
 type V2RayHTTPUpgradeOptions struct {
