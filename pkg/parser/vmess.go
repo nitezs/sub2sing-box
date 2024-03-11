@@ -65,12 +65,18 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 	}
 
 	if vmess.Tls == "tls" {
+		var alpn []string
+		if strings.Contains(vmess.Alpn, ",") {
+			alpn = strings.Split(vmess.Alpn, ",")
+		} else {
+			alpn = nil
+		}
 		tls := model.OutboundTLSOptions{
 			Enabled: true,
 			UTLS: &model.OutboundUTLSOptions{
 				Fingerprint: vmess.Fp,
 			},
-			ALPN: strings.Split(vmess.Alpn, ","),
+			ALPN: alpn,
 		}
 		result.VMess.TLS = &tls
 	}

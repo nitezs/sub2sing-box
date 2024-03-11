@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"fmt"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -10,11 +10,11 @@ import (
 
 func ParseTrojan(proxy string) (model.Proxy, error) {
 	if !strings.HasPrefix(proxy, "trojan://") {
-		return model.Proxy{}, fmt.Errorf("invalid trojan Url")
+		return model.Proxy{}, errors.New("invalid trojan Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "trojan://"), "@", 2)
 	if len(parts) != 2 {
-		return model.Proxy{}, fmt.Errorf("invalid trojan Url")
+		return model.Proxy{}, errors.New("invalid trojan Url")
 	}
 	serverInfo := strings.SplitN(parts[1], "#", 2)
 	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
@@ -24,7 +24,7 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 		return model.Proxy{}, err
 	}
 	if len(serverAndPort) != 2 {
-		return model.Proxy{}, fmt.Errorf("invalid trojan")
+		return model.Proxy{}, errors.New("invalid trojan Url")
 	}
 	port, err := strconv.Atoi(strings.TrimSpace(serverAndPort[1]))
 	if err != nil {
@@ -49,9 +49,15 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 		},
 	}
 	if params.Get("security") == "xtls" || params.Get("security") == "tls" {
+		var alpn []string
+		if strings.Contains(params.Get("alpn"), ",") {
+			alpn = strings.Split(params.Get("alpn"), ",")
+		} else {
+			alpn = nil
+		}
 		result.Trojan.TLS = &model.OutboundTLSOptions{
 			Enabled:    true,
-			ALPN:       strings.Split(params.Get("alpn"), ","),
+			ALPN:       alpn,
 			ServerName: params.Get("sni"),
 		}
 	}

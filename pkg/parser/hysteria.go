@@ -47,9 +47,14 @@ func ParseHysteria(proxy string) (model.Proxy, error) {
 	insecure := params.Get("insecure")
 	upmbps := params.Get("upmbps")
 	downmbps := params.Get("downmbps")
-	alpn := params.Get("alpn")
 	obfs := params.Get("obfs")
 	// obfsParam := params.Get("obfsParam")
+	var alpn []string
+	if params.Get("alpn") != "" {
+		alpn = strings.Split(params.Get("alpn"), ",")
+	} else {
+		alpn = nil
+	}
 	remarks := ""
 	if strings.Contains(parts[1], "#") {
 		r := strings.Split(parts[1], "#")
@@ -75,7 +80,7 @@ func ParseHysteria(proxy string) (model.Proxy, error) {
 			TLS: &model.OutboundTLSOptions{
 				Enabled:  true,
 				Insecure: insecureBool,
-				ALPN:     strings.Split(alpn, ","),
+				ALPN:     alpn,
 			},
 		},
 	}

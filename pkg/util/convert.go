@@ -3,7 +3,6 @@ package util
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"os"
@@ -25,7 +24,6 @@ func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
 		proxyTags = append(proxyTags, p.Tag)
 	}
 	ps, err := json.Marshal(&proxies)
-	fmt.Print(string(ps))
 	if err != nil {
 		return "", err
 	}

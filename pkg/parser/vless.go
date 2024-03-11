@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"fmt"
+	"errors"
 	"net/url"
 	"strconv"
 	"strings"
@@ -10,11 +10,11 @@ import (
 
 func ParseVless(proxy string) (model.Proxy, error) {
 	if !strings.HasPrefix(proxy, "vless://") {
-		return model.Proxy{}, fmt.Errorf("invalid vless Url")
+		return model.Proxy{}, errors.New("invalid vless Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "vless://"), "@", 2)
 	if len(parts) != 2 {
-		return model.Proxy{}, fmt.Errorf("invalid vless Url")
+		return model.Proxy{}, errors.New("invalid vless Url")
 	}
 	serverInfo := strings.SplitN(parts[1], "#", 2)
 	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
@@ -24,7 +24,7 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		return model.Proxy{}, err
 	}
 	if len(serverAndPort) != 2 {
-		return model.Proxy{}, fmt.Errorf("invalid vless")
+		return model.Proxy{}, errors.New("invalid vless Url")
 	}
 	port, err := strconv.Atoi(strings.TrimSpace(serverAndPort[1]))
 	if err != nil {
@@ -59,13 +59,25 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		},
 	}
 	if params.Get("security") == "tls" {
+		var alpn []string
+		if strings.Contains(params.Get("alpn"), ",") {
+			alpn = strings.Split(params.Get("alpn"), ",")
+		} else {
+			alpn = nil
+		}
 		result.VLESS.TLS = &model.OutboundTLSOptions{
 			Enabled:  true,
-			ALPN:     strings.Split(params.Get("alpn"), ","),
+			ALPN:     alpn,
 			Insecure: params.Get("allowInsecure") == "1",
 		}
 	}
 	if params.Get("security") == "reality" {
+		var alpn []string
+		if strings.Contains(params.Get("alpn"), ",") {
+			alpn = strings.Split(params.Get("alpn"), ",")
+		} else {
+			alpn = nil
+		}
 		result.VLESS.TLS = &model.OutboundTLSOptions{
 			Enabled:    true,
 			ServerName: params.Get("sni"),
@@ -78,7 +90,7 @@ func ParseVless(proxy string) (model.Proxy, error) {
 				PublicKey: params.Get("pbk"),
 				ShortID:   params.Get("sid"),
 			},
-			ALPN: strings.Split(params.Get("alpn"), ","),
+			ALPN: alpn,
 		}
 	}
 	if params.Get("type") == "ws" {
