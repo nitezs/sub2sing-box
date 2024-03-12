@@ -183,7 +183,7 @@
             "type": "selector",
             "tag": "Bilibili",
             "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
-            "default": "节点选择",
+            "default": "direct",
             "interrupt_exist_connections": true
         },
         {
@@ -197,7 +197,7 @@
             "type": "selector",
             "tag": "Games(中国)",
             "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
-            "default": "节点选择",
+            "default": "direct",
             "interrupt_exist_connections": true
         },
         {

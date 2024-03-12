@@ -1,5 +1,9 @@
 # sub2sing-box
 
+## Cli Command
+
+### convert
+
 ```
 Convert common proxy to sing-box proxy
 
@@ -16,6 +20,8 @@ Flags:
   -t, --template string         template file path
 ```
 
+### server
+
 ```
 Run the server
 
@@ -26,6 +32,17 @@ Flags:
   -h, --help          help for server
   -p, --port uint16   server port (default 8080)
 ```
+
+#### api
+
+##### GET /convert
+
+- `data`: Base64 编码的 JSON 字符串，包含以下字段：
+  - `subscription`: []string
+  - `proxy`: []string
+  - `delete`: string
+  - `rename`: string
+  - `template`: string
 
 ## Template
 
