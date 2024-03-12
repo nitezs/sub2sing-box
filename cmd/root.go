@@ -1,8 +1,11 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+)
 
 var RootCmd = &cobra.Command{}
 
-func init() {
+func SetVersion(version string) {
+	RootCmd.Version = version
 }
