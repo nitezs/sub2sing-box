@@ -40,9 +40,22 @@ Flags:
 - `data`: Base64 编码的 JSON 字符串，包含以下字段：
   - `subscription`: []string
   - `proxy`: []string
-  - `delete`: string
-  - `rename`: string
-  - `template`: string
+  - `delete`: string 可选
+  - `rename`: string 可选
+  - `template`: map[string]string 可选
+
+示例
+```
+{
+  "subscription": ["url1", "url2"],
+  "proxy": ["p1", "p2"],
+  "delete": "reg",
+  "template": "t",
+  "rename": {
+    "text": "replaceTo"
+  }
+}
+```
 
 ## Template
 
@@ -56,3 +69,7 @@ Template 中使用 `<all-proxy-tags>` 指明节点插入位置，例如
   "interrupt_exist_connections": true
 },
 ```
+
+## Docker
+
+`docker run -p 8080:8080 nite07/sub2sing-box`

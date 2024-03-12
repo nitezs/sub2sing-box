@@ -14,7 +14,7 @@ func RunServer(port uint16) {
 
 	r.GET("/convert", handler.Convert)
 
-	fmt.Println("Server is running on port ", port)
+	fmt.Println("Server is running on port", port)
 	err := r.Run(":" + strconv.Itoa(int(port)))
 	if err != nil {
 		fmt.Println("Run server failed: ", err)
