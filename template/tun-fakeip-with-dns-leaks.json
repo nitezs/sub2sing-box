@@ -25,6 +25,10 @@
         "server": "local"
       },
       {
+        "query_type": ["A", "AAAA"],
+        "server": "remote"
+      },
+      {
         "clash_mode": "Direct",
         "server": "local"
       },
@@ -35,10 +39,6 @@
       {
         "rule_set": "geosite-geolocation-cn",
         "server": "local"
-      },
-      {
-        "query_type": ["A", "AAAA"],
-        "server": "remote"
       }
     ],
     "fakeip": {
