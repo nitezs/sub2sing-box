@@ -1,0 +1,8 @@
+services:
+  sub2sing-box:
+    image: nite07/sub2sing-box:latest
+    container_name: sub2sing-box
+    volumes:
+      - ./template:/app/template
+    ports:
+      - 8080:8080
