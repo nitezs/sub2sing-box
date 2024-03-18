@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -97,6 +98,11 @@ func Convert(subscriptions []string, proxies []string, template string, delete s
 }
 
 func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
+	if !strings.Contains(template, string(filepath.Separator)) {
+		if _, err := os.Stat(template); os.IsNotExist(err) {
+			template = filepath.Join("templates", template)
+		}
+	}
 	config, err := ReadTemplate(template)
 	proxyTags := make([]string, 0)
 	if err != nil {
@@ -115,19 +121,18 @@ func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
 		return "", err
 	}
 	for i, outbound := range config.Outbounds {
-		if outbound.Type == "urltest" || outbound.Type == "selector" {
-			var parsedOutbound []string = make([]string, 0)
-			for _, o := range outbound.Outbounds {
-				if o == "<all-proxy-tags>" {
-					parsedOutbound = append(parsedOutbound, proxyTags...)
-				} else {
-					parsedOutbound = append(parsedOutbound, o)
-				}
+		var parsedOutbound []string = make([]string, 0)
+		for _, o := range outbound.Outbounds {
+			if o == "<all-proxy-tags>" {
+				parsedOutbound = append(parsedOutbound, proxyTags...)
+			} else {
+				parsedOutbound = append(parsedOutbound, o)
 			}
-			config.Outbounds[i].Outbounds = parsedOutbound
 		}
+		config.Outbounds[i].Outbounds = parsedOutbound
 	}
 	config.Outbounds = append(config.Outbounds, newOutbounds...)
+	//TODO: 国家策略组
 	data, err := json.Marshal(config)
 	if err != nil {
 		return "", err
@@ -256,4 +261,21 @@ func RenameProxy(proxies []model.Proxy, regex string, replaceText string) ([]mod
 		}
 	}
 	return proxies, nil
+}
+
+func GetContryName(proxyName string) string {
+	countryMaps := []map[string]string{
+		model.CountryFlag,
+		model.CountryChineseName,
+		model.CountryISO,
+		model.CountryEnglishName,
+	}
+	for _, countryMap := range countryMaps {
+		for k, v := range countryMap {
+			if strings.Contains(proxyName, k) {
+				return v
+			}
+		}
+	}
+	return "其他地区"
 }

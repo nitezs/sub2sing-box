@@ -16,6 +16,13 @@ builds:
     flags:
       - -trimpath
     no_unique_dist_dir: true
-    binary: "{{ .ProjectName }}-{{ .Os }}-{{ .Arch }}"
 archives:
-  - format: binary
+  - format: tar.gz
+    format_overrides:
+      - format: zip
+        goos: windows
+    wrap_in_directory: true
+    files:
+      - LICENSE
+      - README.md
+      - templates
