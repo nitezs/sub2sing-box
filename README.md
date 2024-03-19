@@ -1,43 +1,18 @@
 # sub2sing-box
 
-## Cli Command
+## cli
 
-### convert
+- convert: 转换
+- server: 启动 Web UI
+- version: 版本信息
 
-```
-Convert common proxy to sing-box proxy
+`sub2sing-box <command> -h` 查看帮助
 
-Usage:
-   convert [flags]
-
-Flags:
-  -d, --delete string           delete proxy with regex
-  -h, --help                    help for convert
-  -o, --output string           output file path
-  -p, --proxy strings           common proxies
-  -r, --rename stringToString   rename proxy with regex (default [])
-  -s, --subscription strings    subscription urls
-  -t, --template string         template file path
-```
-
-### server
-
-```
-Run the server
-
-Usage:
-   server [flags]
-
-Flags:
-  -h, --help          help for server
-  -p, --port uint16   server port (default 8080)
-```
-
-#### api
+## api
 
 ##### GET /convert
 
-- `data`: Base64 编码的 JSON 字符串，包含以下字段：
+- `data`: Base64 编码(url safe)的 JSON 字符串，包含以下字段：
   - `subscription`: []string
   - `proxy`: []string
   - `delete`: string 可选
@@ -45,6 +20,7 @@ Flags:
   - `template`: map[string]string 可选
 
 示例
+
 ```
 {
   "subscription": ["url1", "url2"],
