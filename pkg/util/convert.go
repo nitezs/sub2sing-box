@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strings"
 
 	"sub2sing-box/internal/model"
@@ -14,7 +15,17 @@ import (
 	"sub2sing-box/pkg/parser"
 )
 
-func Convert(subscriptions []string, proxies []string, template string, delete string, rename map[string]string) (string, error) {
+func Convert(
+	subscriptions []string,
+	proxies []string,
+	template string,
+	delete string,
+	rename map[string]string,
+	group bool,
+	groupType string,
+	sortKey string,
+	sortType string,
+) (string, error) {
 	result := ""
 	var err error
 
@@ -78,14 +89,25 @@ func Convert(subscriptions []string, proxies []string, template string, delete s
 		}
 	}
 	proxyList = newProxyList
-
+	var outbounds []model.Outbound
+	ps, err := json.Marshal(&proxyList)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(ps, &outbounds)
+	if err != nil {
+		return "", err
+	}
+	if group {
+		outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
+	}
 	if template != "" {
-		result, err = MergeTemplate(proxyList, template)
+		result, err = MergeTemplate(outbounds, template)
 		if err != nil {
 			return "", err
 		}
 	} else {
-		r, err := json.Marshal(proxyList)
+		r, err := json.Marshal(outbounds)
 		result = string(r)
 		if err != nil {
 			return "", err
@@ -95,7 +117,51 @@ func Convert(subscriptions []string, proxies []string, template string, delete s
 	return string(result), nil
 }
 
-func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
+func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string, sortType string) []model.Outbound {
+	newGroup := make(map[string]model.Outbound)
+	for _, p := range proxies {
+		if p.Type != "selector" && p.Type != "urltest" {
+			country := model.GetContryName(p.Tag)
+			if group, ok := newGroup[country]; ok {
+				group.Outbounds = append(group.Outbounds, p.Tag)
+				newGroup[country] = group
+			} else {
+				newGroup[country] = model.Outbound{
+					Tag:                       country,
+					Type:                      groupType,
+					Outbounds:                 []string{p.Tag},
+					InterruptExistConnections: true,
+				}
+			}
+		}
+	}
+	var groups []model.Outbound
+	for _, p := range newGroup {
+		groups = append(groups, p)
+	}
+	if sortType == "asc" {
+		switch sortKey {
+		case "tag":
+			sort.Sort(model.SortByTag(groups))
+		case "num":
+			sort.Sort(model.SortByNumber(groups))
+		default:
+			sort.Sort(model.SortByTag(groups))
+		}
+	} else {
+		switch sortKey {
+		case "tag":
+			sort.Sort(sort.Reverse(model.SortByTag(groups)))
+		case "num":
+			sort.Sort(sort.Reverse(model.SortByNumber(groups)))
+		default:
+			sort.Sort(sort.Reverse(model.SortByTag(groups)))
+		}
+	}
+	return append(proxies, groups...)
+}
+
+func MergeTemplate(outbounds []model.Outbound, template string) (string, error) {
 	var config model.Config
 	var err error
 	if strings.HasPrefix(template, "http") {
@@ -116,34 +182,41 @@ func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
 		config, err = ReadTemplate(template)
 	}
 	proxyTags := make([]string, 0)
+	groupTags := make([]string, 0)
+	groups := make(map[string]model.Outbound)
 	if err != nil {
 		return "", err
 	}
-	for _, p := range proxies {
-		proxyTags = append(proxyTags, p.Tag)
+	for _, p := range outbounds {
+		if model.IsCountryGroup(p.Tag) {
+			groupTags = append(groupTags, p.Tag)
+			reg := regexp.MustCompile("[A-Za-z]{2}")
+			country := reg.FindString(p.Tag)
+			groups[country] = p
+		} else {
+			proxyTags = append(proxyTags, p.Tag)
+		}
 	}
-	ps, err := json.Marshal(&proxies)
-	if err != nil {
-		return "", err
-	}
-	var newOutbounds []model.Outbound
-	err = json.Unmarshal(ps, &newOutbounds)
-	if err != nil {
-		return "", err
-	}
+	reg := regexp.MustCompile("<[A-Za-z]{2}>")
 	for i, outbound := range config.Outbounds {
 		var parsedOutbound []string = make([]string, 0)
 		for _, o := range outbound.Outbounds {
 			if o == "<all-proxy-tags>" {
 				parsedOutbound = append(parsedOutbound, proxyTags...)
+			} else if o == "<all-country-tags>" {
+				parsedOutbound = append(parsedOutbound, groupTags...)
+			} else if reg.MatchString(o) {
+				country := strings.ToUpper(strings.Trim(reg.FindString(o), "<>"))
+				if group, ok := groups[country]; ok {
+					parsedOutbound = append(parsedOutbound, group.Outbounds...)
+				}
 			} else {
 				parsedOutbound = append(parsedOutbound, o)
 			}
 		}
 		config.Outbounds[i].Outbounds = parsedOutbound
 	}
-	config.Outbounds = append(config.Outbounds, newOutbounds...)
-	//TODO: 国家策略组
+	config.Outbounds = append(config.Outbounds, outbounds...)
 	data, err := json.Marshal(config)
 	if err != nil {
 		return "", err
@@ -253,21 +326,4 @@ func RenameProxy(proxies []model.Proxy, regex string, replaceText string) ([]mod
 		}
 	}
 	return proxies, nil
-}
-
-func GetContryName(proxyName string) string {
-	countryMaps := []map[string]string{
-		model.CountryFlag,
-		model.CountryChineseName,
-		model.CountryISO,
-		model.CountryEnglishName,
-	}
-	for _, countryMap := range countryMaps {
-		for k, v := range countryMap {
-			if strings.Contains(proxyName, k) {
-				return v
-			}
-		}
-	}
-	return "其他地区"
 }

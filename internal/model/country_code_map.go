@@ -1,5 +1,11 @@
 package model
 
+import (
+	"regexp"
+	"slices"
+	"strings"
+)
+
 // https://zh.wikipedia.org/wiki/%E5%8C%BA%E5%9F%9F%E6%8C%87%E7%A4%BA%E7%AC%A6
 // https://zh.wikipedia.org/zh-sg/ISO_3166-1%E4%BA%8C%E4%BD%8D%E5%AD%97%E6%AF%8D%E4%BB%A3%E7%A0%81
 
@@ -1041,4 +1047,42 @@ var CountryISO = map[string]string{
 	"ZA": "南非(ZA)",
 	"ZM": "赞比亚(ZM)",
 	"ZW": "津巴布韦(ZW)",
+}
+
+func GetContryName(tag string) string {
+	reg := regexp.MustCompile(`(\s?[A-Za-z]{2}[\s-_/]|[\(\[][A-Za-z]{2}[\)\]])`)
+	tagSlice := reg.FindStringSubmatch(tag)
+	for i := range tagSlice {
+		tagSlice[i] = strings.ToLower(strings.Trim(tagSlice[i], "()[] -_/"))
+	}
+	countryMaps := []map[string]string{
+		CountryFlag,
+		CountryChineseName,
+		CountryISO,
+		CountryEnglishName,
+	}
+	for _, countryMap := range countryMaps {
+		for k, v := range countryMap {
+			if slices.Contains(tagSlice, strings.ToLower(k)) {
+				return v
+			}
+			if strings.Contains(tag, strings.ToLower(k)) {
+				return v
+			}
+		}
+	}
+	return "其他地区"
+}
+
+var values []string
+
+func IsCountryGroup(tag string) bool {
+	return slices.Contains(values, tag)
+}
+
+func init() {
+	values = make([]string, 0, len(CountryISO))
+	for _, v := range CountryISO {
+		values = append(values, v)
+	}
 }

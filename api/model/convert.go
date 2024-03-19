@@ -6,4 +6,8 @@ type ConvertRequest struct {
 	Template      string            `form:"template" json:"template"`
 	Delete        string            `form:"delete" json:"delete"`
 	Rename        map[string]string `form:"rename" json:"rename"`
+	Group         bool              `form:"group" json:"group"`
+	GroupType     string            `form:"group-type" json:"group-type"`
+	SortKey       string            `form:"sort" json:"sort"`
+	SortType      string            `form:"sort-type" json:"sort-type"`
 }

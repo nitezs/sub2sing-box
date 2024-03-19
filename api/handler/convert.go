@@ -38,7 +38,17 @@ func Convert(c *gin.Context) {
 		})
 		return
 	}
-	result, err := putil.Convert(data.Subscriptions, data.Proxies, data.Template, data.Delete, data.Rename)
+	result, err := putil.Convert(
+		data.Subscriptions,
+		data.Proxies,
+		data.Template,
+		data.Delete,
+		data.Rename,
+		data.Group,
+		data.GroupType,
+		data.SortKey,
+		data.SortType,
+	)
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": err.Error(),
