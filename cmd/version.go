@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"sub2sing-box/constant"
 
 	"github.com/spf13/cobra"
 )
@@ -11,7 +12,7 @@ var versionCmd = &cobra.Command{
 	Short: "Print version",
 	Long:  "Print version",
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("version: " + RootCmd.Version)
+		fmt.Println("version: " + constant.Version)
 	},
 }
 

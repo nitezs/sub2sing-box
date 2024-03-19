@@ -5,7 +5,3 @@ import (
 )
 
 var RootCmd = &cobra.Command{}
-
-func SetVersion(version string) {
-	RootCmd.Version = version
-}
