@@ -4,15 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 
-	. "sub2sing-box/internal"
 	"sub2sing-box/internal/model"
+	"sub2sing-box/internal/util"
 	"sub2sing-box/pkg/parser"
 )
 
@@ -98,12 +96,25 @@ func Convert(subscriptions []string, proxies []string, template string, delete s
 }
 
 func MergeTemplate(proxies []model.Proxy, template string) (string, error) {
-	if !strings.Contains(template, string(filepath.Separator)) {
-		if _, err := os.Stat(template); os.IsNotExist(err) {
-			template = filepath.Join("templates", template)
+	var config model.Config
+	var err error
+	if strings.HasPrefix(template, "http") {
+		data, err := util.Fetch(template, 3)
+		if err != nil {
+			return "", err
 		}
+		err = json.Unmarshal([]byte(data), &config)
+		if err != nil {
+			return "", err
+		}
+	} else {
+		if !strings.Contains(template, string(filepath.Separator)) {
+			if _, err := os.Stat(template); os.IsNotExist(err) {
+				template = filepath.Join("templates", template)
+			}
+		}
+		config, err = ReadTemplate(template)
 	}
-	config, err := ReadTemplate(template)
 	proxyTags := make([]string, 0)
 	if err != nil {
 		return "", err
@@ -165,33 +176,14 @@ func ConvertCProxyToJson(proxy string) (string, error) {
 	return string(data), nil
 }
 
-func FetchSubscription(url string, maxRetryTimes int) (string, error) {
-	retryTime := 0
-	var err error
-	for retryTime < maxRetryTimes {
-		resp, err := http.Get(url)
-		if err != nil {
-			retryTime++
-			continue
-		}
-		data, err := io.ReadAll(resp.Body)
-		if err != nil {
-			retryTime++
-			continue
-		}
-		return string(data), err
-	}
-	return "", err
-}
-
 func ConvertSubscriptionsToSProxy(urls []string) ([]model.Proxy, error) {
 	proxyList := make([]model.Proxy, 0)
 	for _, url := range urls {
-		data, err := FetchSubscription(url, 3)
+		data, err := util.Fetch(url, 3)
 		if err != nil {
 			return nil, err
 		}
-		proxy, err := DecodeBase64(data)
+		proxy, err := util.DecodeBase64(data)
 		if err != nil {
 			return nil, err
 		}

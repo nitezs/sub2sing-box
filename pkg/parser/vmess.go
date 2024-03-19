@@ -6,15 +6,15 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/internal"
 	"sub2sing-box/internal/model"
+	"sub2sing-box/internal/util"
 )
 
 func ParseVmess(proxy string) (model.Proxy, error) {
 	if !strings.HasPrefix(proxy, "vmess://") {
 		return model.Proxy{}, errors.New("invalid vmess url")
 	}
-	base64, err := internal.DecodeBase64(strings.TrimPrefix(proxy, "vmess://"))
+	base64, err := util.DecodeBase64(strings.TrimPrefix(proxy, "vmess://"))
 	if err != nil {
 		return model.Proxy{}, errors.New("invalid vmess url" + err.Error())
 	}
