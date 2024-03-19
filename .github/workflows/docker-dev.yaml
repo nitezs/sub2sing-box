@@ -1,6 +1,9 @@
 name: Build and Push Docker(Dev)
 
 on:
+  push:
+    tags:
+      - "v[0-9].[0-9].[0-9]-beta*"
   workflow_dispatch:
 
 jobs:
