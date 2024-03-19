@@ -27,6 +27,8 @@ archives:
       - README.md
       - templates
 release:
+  prerelease: auto
+  draft: true
   github:
     owner: nitezs
     name: sub2sing-box
