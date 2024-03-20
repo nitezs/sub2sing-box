@@ -71,14 +71,13 @@ func ParseVmess(proxy string) (model2.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		tls := model2.OutboundTLSOptions{
+		result.VMess.TLS = &model2.OutboundTLSOptions{
 			Enabled: true,
 			UTLS: &model2.OutboundUTLSOptions{
 				Fingerprint: vmess.Fp,
 			},
 			ALPN: alpn,
 		}
-		result.VMess.TLS = &tls
 	}
 
 	if vmess.Net == "ws" {
@@ -94,20 +93,21 @@ func ParseVmess(proxy string) (model2.Proxy, error) {
 				"Host": vmess.Host,
 			},
 		}
-		transport := model2.V2RayTransportOptions{
+		result.VMess.Transport = &model2.V2RayTransportOptions{
 			Type:             "ws",
 			WebsocketOptions: ws,
 		}
-		result.VMess.Transport = &transport
 	}
 
 	if vmess.Net == "quic" {
 		quic := model2.V2RayQUICOptions{}
-		transport := model2.V2RayTransportOptions{
+		result.VMess.Transport = &model2.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: quic,
 		}
-		result.VMess.Transport = &transport
+		result.VMess.TLS = &model2.OutboundTLSOptions{
+			Enabled: true,
+		}
 	}
 
 	if vmess.Net == "grpc" {
@@ -115,11 +115,10 @@ func ParseVmess(proxy string) (model2.Proxy, error) {
 			ServiceName:         vmess.Path,
 			PermitWithoutStream: true,
 		}
-		transport := model2.V2RayTransportOptions{
+		result.VMess.Transport = &model2.V2RayTransportOptions{
 			Type:        "grpc",
 			GRPCOptions: grpc,
 		}
-		result.VMess.Transport = &transport
 	}
 
 	if vmess.Net == "h2" {
@@ -127,11 +126,10 @@ func ParseVmess(proxy string) (model2.Proxy, error) {
 			Host: strings.Split(vmess.Host, ","),
 			Path: vmess.Path,
 		}
-		transport := model2.V2RayTransportOptions{
+		result.VMess.Transport = &model2.V2RayTransportOptions{
 			Type:        "http",
 			HTTPOptions: httpOps,
 		}
-		result.VMess.Transport = &transport
 	}
 
 	return result, nil
