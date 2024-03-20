@@ -3,3 +3,4 @@
 dist
 *test.go
 template.json
+.idea

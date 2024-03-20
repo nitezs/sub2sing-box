@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	model2 "sub2sing-box/model"
+	"sub2sing-box/model"
 )
 
 //hysteria://host:port?protocol=udp&auth=123456&peer=sni.domain&insecure=1&upmbps=100&downmbps=100&alpn=hysteria&obfs=xplus&obfsParam=123456#remarks
@@ -23,23 +23,23 @@ import (
 //- obfsParam: Obfuscation password (optional)
 //- remarks: remarks (optional)
 
-func ParseHysteria(proxy string) (model2.Proxy, error) {
+func ParseHysteria(proxy string) (model.Outbound, error) {
 	if !strings.HasPrefix(proxy, "hysteria://") {
-		return model2.Proxy{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, errors.New("invalid hysteria Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "hysteria://"), "?", 2)
 	serverInfo := strings.SplitN(parts[0], ":", 2)
 	if len(serverInfo) != 2 {
-		return model2.Proxy{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, errors.New("invalid hysteria Url")
 	}
 	params, err := url.ParseQuery(parts[1])
 	if err != nil {
-		return model2.Proxy{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, errors.New("invalid hysteria Url")
 	}
 	host := serverInfo[0]
 	port, err := strconv.Atoi(serverInfo[1])
 	if err != nil {
-		return model2.Proxy{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, errors.New("invalid hysteria Url")
 	}
 	protocol := params.Get("protocol")
 	auth := params.Get("auth")
@@ -64,23 +64,27 @@ func ParseHysteria(proxy string) (model2.Proxy, error) {
 	}
 	insecureBool, err := strconv.ParseBool(insecure)
 	if err != nil {
-		return model2.Proxy{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, errors.New("invalid hysteria Url")
 	}
-	result := model2.Proxy{
+	result := model.Outbound{
 		Type: "hysteria",
 		Tag:  remarks,
-		Hysteria: model2.Hysteria{
-			Server:     host,
-			ServerPort: uint16(port),
-			Up:         upmbps,
-			Down:       downmbps,
-			Auth:       []byte(auth),
-			Obfs:       obfs,
-			Network:    protocol,
-			TLS: &model2.OutboundTLSOptions{
-				Enabled:  true,
-				Insecure: insecureBool,
-				ALPN:     alpn,
+		HysteriaOptions: model.HysteriaOutboundOptions{
+			ServerOptions: model.ServerOptions{
+				Server:     host,
+				ServerPort: uint16(port),
+			},
+			Up:      upmbps,
+			Down:    downmbps,
+			Auth:    []byte(auth),
+			Obfs:    obfs,
+			Network: protocol,
+			OutboundTLSOptionsContainer: model.OutboundTLSOptionsContainer{
+				TLS: &model.OutboundTLSOptions{
+					Enabled:  true,
+					Insecure: insecureBool,
+					ALPN:     alpn,
+				},
 			},
 		},
 	}

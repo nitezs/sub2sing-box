@@ -5,30 +5,30 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	model2 "sub2sing-box/model"
+	"sub2sing-box/model"
 )
 
-func ParseVless(proxy string) (model2.Proxy, error) {
+func ParseVless(proxy string) (model.Outbound, error) {
 	if !strings.HasPrefix(proxy, "vless://") {
-		return model2.Proxy{}, errors.New("invalid vless Url")
+		return model.Outbound{}, errors.New("invalid vless Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "vless://"), "@", 2)
 	if len(parts) != 2 {
-		return model2.Proxy{}, errors.New("invalid vless Url")
+		return model.Outbound{}, errors.New("invalid vless Url")
 	}
 	serverInfo := strings.SplitN(parts[1], "#", 2)
 	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
 	serverAndPort := strings.SplitN(serverAndPortAndParams[0], ":", 2)
 	params, err := url.ParseQuery(serverAndPortAndParams[1])
 	if err != nil {
-		return model2.Proxy{}, err
+		return model.Outbound{}, err
 	}
 	if len(serverAndPort) != 2 {
-		return model2.Proxy{}, errors.New("invalid vless Url")
+		return model.Outbound{}, errors.New("invalid vless Url")
 	}
 	port, err := strconv.Atoi(strings.TrimSpace(serverAndPort[1]))
 	if err != nil {
-		return model2.Proxy{}, err
+		return model.Outbound{}, err
 	}
 	remarks := ""
 	if len(serverInfo) == 2 {
@@ -37,25 +37,27 @@ func ParseVless(proxy string) (model2.Proxy, error) {
 		} else {
 			remarks, err = url.QueryUnescape(serverInfo[1])
 			if err != nil {
-				return model2.Proxy{}, err
+				return model.Outbound{}, err
 			}
 		}
 	} else {
 		remarks, err = url.QueryUnescape(serverAndPort[0])
 		if err != nil {
-			return model2.Proxy{}, err
+			return model.Outbound{}, err
 		}
 	}
 	server := strings.TrimSpace(serverAndPort[0])
 	uuid := strings.TrimSpace(parts[0])
-	result := model2.Proxy{
+	result := model.Outbound{
 		Type: "vless",
 		Tag:  remarks,
-		VLESS: model2.VLESS{
-			Server:     server,
-			ServerPort: uint16(port),
-			UUID:       uuid,
-			Flow:       params.Get("flow"),
+		VLESSOptions: model.VLESSOutboundOptions{
+			ServerOptions: model.ServerOptions{
+				Server:     server,
+				ServerPort: uint16(port),
+			},
+			UUID: uuid,
+			Flow: params.Get("flow"),
 		},
 	}
 	if params.Get("security") == "tls" {
@@ -65,10 +67,12 @@ func ParseVless(proxy string) (model2.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		result.VLESS.TLS = &model2.OutboundTLSOptions{
-			Enabled:  true,
-			ALPN:     alpn,
-			Insecure: params.Get("allowInsecure") == "1",
+		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
+			TLS: &model.OutboundTLSOptions{
+				Enabled:  true,
+				ALPN:     alpn,
+				Insecure: params.Get("allowInsecure") == "1",
+			},
 		}
 	}
 	if params.Get("security") == "reality" {
@@ -78,45 +82,49 @@ func ParseVless(proxy string) (model2.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		result.VLESS.TLS = &model2.OutboundTLSOptions{
-			Enabled:    true,
-			ServerName: params.Get("sni"),
-			UTLS: &model2.OutboundUTLSOptions{
-				Enabled:     params.Get("fp") != "",
-				Fingerprint: params.Get("fp"),
+		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
+			TLS: &model.OutboundTLSOptions{
+				Enabled:    true,
+				ServerName: params.Get("sni"),
+				UTLS: &model.OutboundUTLSOptions{
+					Enabled:     params.Get("fp") != "",
+					Fingerprint: params.Get("fp"),
+				},
+				Reality: &model.OutboundRealityOptions{
+					Enabled:   true,
+					PublicKey: params.Get("pbk"),
+					ShortID:   params.Get("sid"),
+				},
+				ALPN: alpn,
 			},
-			Reality: &model2.OutboundRealityOptions{
-				Enabled:   true,
-				PublicKey: params.Get("pbk"),
-				ShortID:   params.Get("sid"),
-			},
-			ALPN: alpn,
 		}
 	}
 	if params.Get("type") == "ws" {
-		result.VLESS.Transport = &model2.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model2.V2RayWebsocketOptions{
+			WebsocketOptions: model.V2RayWebsocketOptions{
 				Path: params.Get("path"),
-				Headers: map[string]string{
-					"Host": params.Get("host"),
-				},
 			},
+		}
+		if params.Get("host") != "" {
+			result.VLESSOptions.Transport.WebsocketOptions.Headers["Host"] = params.Get("host")
 		}
 	}
 	if params.Get("type") == "quic" {
-		result.VLESS.Transport = &model2.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type:        "quic",
-			QUICOptions: model2.V2RayQUICOptions{},
+			QUICOptions: model.V2RayQUICOptions{},
 		}
-		result.VLESS.TLS = &model2.OutboundTLSOptions{
-			Enabled: true,
+		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
+			TLS: &model.OutboundTLSOptions{
+				Enabled: true,
+			},
 		}
 	}
 	if params.Get("type") == "grpc" {
-		result.VLESS.Transport = &model2.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type: "grpc",
-			GRPCOptions: model2.V2RayGRPCOptions{
+			GRPCOptions: model.V2RayGRPCOptions{
 				ServiceName: params.Get("serviceName"),
 			},
 		}
@@ -124,11 +132,11 @@ func ParseVless(proxy string) (model2.Proxy, error) {
 	if params.Get("type") == "http" {
 		host, err := url.QueryUnescape(params.Get("host"))
 		if err != nil {
-			return model2.Proxy{}, err
+			return model.Outbound{}, err
 		}
-		result.VLESS.Transport = &model2.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type: "http",
-			HTTPOptions: model2.V2RayHTTPOptions{
+			HTTPOptions: model.V2RayHTTPOptions{
 				Host: strings.Split(host, ","),
 			},
 		}

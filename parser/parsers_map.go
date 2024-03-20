@@ -4,7 +4,7 @@ import (
 	"sub2sing-box/model"
 )
 
-var ParserMap map[string]func(string) (model.Proxy, error) = map[string]func(string) (model.Proxy, error){
+var ParserMap map[string]func(string) (model.Outbound, error) = map[string]func(string) (model.Outbound, error){
 	"ss://":        ParseShadowsocks,
 	"vmess://":     ParseVmess,
 	"trojan://":    ParseTrojan,

@@ -53,8 +53,8 @@ func (o *V2RayTransportOptions) MarshalJSON() ([]byte, error) {
 }
 
 type V2RayHTTPOptions struct {
-	Host Listable[string] `json:"host,omitempty"`
-	Path string           `json:"path,omitempty"`
+	Host        Listable[string]  `json:"host,omitempty"`
+	Path        string            `json:"path,omitempty"`
 	Method      string            `json:"method,omitempty"`
 	Headers     map[string]string `json:"headers,omitempty"`
 	IdleTimeout string            `json:"idle_timeout,omitempty"`

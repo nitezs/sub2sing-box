@@ -18,17 +18,17 @@ type VmessJson struct {
 	Fp   string      `json:"fp"`
 }
 
-type VMess struct {
-	Server              string                    `json:"server"`
-	ServerPort          uint16                    `json:"server_port"`
-	UUID                string                    `json:"uuid"`
-	Security            string                    `json:"security"`
-	AlterId             int                       `json:"alter_id,omitempty"`
-	GlobalPadding       bool                      `json:"global_padding,omitempty"`
-	AuthenticatedLength bool                      `json:"authenticated_length,omitempty"`
-	Network             string                    `json:"network,omitempty"`
-	TLS                 *OutboundTLSOptions       `json:"tls,omitempty"`
-	PacketEncoding      string                    `json:"packet_encoding,omitempty"`
-	Multiplex           *OutboundMultiplexOptions `json:"multiplex,omitempty"`
-	Transport           *V2RayTransportOptions    `json:"transport,omitempty"`
+type VMessOutboundOptions struct {
+	DialerOptions
+	ServerOptions
+	UUID                string `json:"uuid"`
+	Security            string `json:"security"`
+	AlterId             int    `json:"alter_id,omitempty"`
+	GlobalPadding       bool   `json:"global_padding,omitempty"`
+	AuthenticatedLength bool   `json:"authenticated_length,omitempty"`
+	Network             string `json:"network,omitempty"`
+	OutboundTLSOptionsContainer
+	PacketEncoding string                    `json:"packet_encoding,omitempty"`
+	Multiplex      *OutboundMultiplexOptions `json:"multiplex,omitempty"`
+	Transport      *V2RayTransportOptions    `json:"transport,omitempty"`
 }
