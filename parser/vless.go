@@ -109,6 +109,9 @@ func ParseVless(proxy string) (model2.Proxy, error) {
 			Type:        "quic",
 			QUICOptions: model2.V2RayQUICOptions{},
 		}
+		result.VLESS.TLS = &model2.OutboundTLSOptions{
+			Enabled: true,
+		}
 	}
 	if params.Get("type") == "grpc" {
 		result.VLESS.Transport = &model2.V2RayTransportOptions{
