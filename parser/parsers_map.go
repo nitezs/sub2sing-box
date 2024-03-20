@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"sub2sing-box/internal/model"
+	"sub2sing-box/model"
 )
 
 var ParserMap map[string]func(string) (model.Proxy, error) = map[string]func(string) (model.Proxy, error){
