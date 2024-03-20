@@ -5,30 +5,30 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/internal/model"
+	model2 "sub2sing-box/model"
 )
 
-func ParseTrojan(proxy string) (model.Proxy, error) {
+func ParseTrojan(proxy string) (model2.Proxy, error) {
 	if !strings.HasPrefix(proxy, "trojan://") {
-		return model.Proxy{}, errors.New("invalid trojan Url")
+		return model2.Proxy{}, errors.New("invalid trojan Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "trojan://"), "@", 2)
 	if len(parts) != 2 {
-		return model.Proxy{}, errors.New("invalid trojan Url")
+		return model2.Proxy{}, errors.New("invalid trojan Url")
 	}
 	serverInfo := strings.SplitN(parts[1], "#", 2)
 	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
 	serverAndPort := strings.SplitN(serverAndPortAndParams[0], ":", 2)
 	params, err := url.ParseQuery(serverAndPortAndParams[1])
 	if err != nil {
-		return model.Proxy{}, err
+		return model2.Proxy{}, err
 	}
 	if len(serverAndPort) != 2 {
-		return model.Proxy{}, errors.New("invalid trojan Url")
+		return model2.Proxy{}, errors.New("invalid trojan Url")
 	}
 	port, err := strconv.Atoi(strings.TrimSpace(serverAndPort[1]))
 	if err != nil {
-		return model.Proxy{}, err
+		return model2.Proxy{}, err
 	}
 	remarks := ""
 	if len(serverInfo) == 2 {
@@ -38,10 +38,10 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 	}
 	server := strings.TrimSpace(serverAndPort[0])
 	password := strings.TrimSpace(parts[0])
-	result := model.Proxy{
+	result := model2.Proxy{
 		Type: "trojan",
 		Tag:  remarks,
-		Trojan: model.Trojan{
+		Trojan: model2.Trojan{
 			Server:     server,
 			ServerPort: uint16(port),
 			Password:   password,
@@ -55,31 +55,31 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		result.Trojan.TLS = &model.OutboundTLSOptions{
+		result.Trojan.TLS = &model2.OutboundTLSOptions{
 			Enabled:    true,
 			ALPN:       alpn,
 			ServerName: params.Get("sni"),
 		}
 	}
 	if params.Get("security") == "reality" {
-		result.Trojan.TLS = &model.OutboundTLSOptions{
+		result.Trojan.TLS = &model2.OutboundTLSOptions{
 			Enabled:    true,
 			ServerName: params.Get("sni"),
-			Reality: &model.OutboundRealityOptions{
+			Reality: &model2.OutboundRealityOptions{
 				Enabled:   true,
 				PublicKey: params.Get("pbk"),
 				ShortID:   params.Get("sid"),
 			},
-			UTLS: &model.OutboundUTLSOptions{
+			UTLS: &model2.OutboundUTLSOptions{
 				Enabled:     params.Get("fp") != "",
 				Fingerprint: params.Get("fp"),
 			},
 		}
 	}
 	if params.Get("type") == "ws" {
-		result.Trojan.Transport = &model.V2RayTransportOptions{
+		result.Trojan.Transport = &model2.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model.V2RayWebsocketOptions{
+			WebsocketOptions: model2.V2RayWebsocketOptions{
 				Path: params.Get("path"),
 				Headers: map[string]string{
 					"Host": params.Get("host"),
@@ -88,24 +88,24 @@ func ParseTrojan(proxy string) (model.Proxy, error) {
 		}
 	}
 	if params.Get("type") == "http" {
-		result.Trojan.Transport = &model.V2RayTransportOptions{
+		result.Trojan.Transport = &model2.V2RayTransportOptions{
 			Type: "http",
-			HTTPOptions: model.V2RayHTTPOptions{
+			HTTPOptions: model2.V2RayHTTPOptions{
 				Host: []string{params.Get("host")},
 				Path: params.Get("path"),
 			},
 		}
 	}
 	if params.Get("type") == "quic" {
-		result.Trojan.Transport = &model.V2RayTransportOptions{
+		result.Trojan.Transport = &model2.V2RayTransportOptions{
 			Type:        "quic",
-			QUICOptions: model.V2RayQUICOptions{},
+			QUICOptions: model2.V2RayQUICOptions{},
 		}
 	}
 	if params.Get("type") == "grpc" {
-		result.Trojan.Transport = &model.V2RayTransportOptions{
+		result.Trojan.Transport = &model2.V2RayTransportOptions{
 			Type: "grpc",
-			GRPCOptions: model.V2RayGRPCOptions{
+			GRPCOptions: model2.V2RayGRPCOptions{
 				ServiceName: params.Get("serviceName"),
 			},
 		}

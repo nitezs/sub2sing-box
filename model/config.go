@@ -65,12 +65,12 @@ type LogOptions struct {
 }
 
 type DNSOptions struct {
-	Servers          Listable[DNSServerOptions] `json:"servers,omitempty"`
-	Rules            Listable[DNSRule]          `json:"rules,omitempty"`
-	Final            string                     `json:"final,omitempty"`
-	ReverseMapping   bool                       `json:"reverse_mapping,omitempty"`
-	FakeIP           *DNSFakeIPOptions          `json:"fakeip,omitempty"`
-	Strategy         string                     `json:"strategy,omitempty"`
+	Servers        Listable[DNSServerOptions] `json:"servers,omitempty"`
+	Rules          Listable[DNSRule]          `json:"rules,omitempty"`
+	Final          string                     `json:"final,omitempty"`
+	ReverseMapping bool                       `json:"reverse_mapping,omitempty"`
+	FakeIP         *DNSFakeIPOptions          `json:"fakeip,omitempty"`
+	Strategy       string                     `json:"strategy,omitempty"`
 	DisableCache     bool                       `json:"disable_cache,omitempty"`
 	DisableExpire    bool                       `json:"disable_expire,omitempty"`
 	IndependentCache bool                       `json:"independent_cache,omitempty"`
@@ -162,29 +162,29 @@ type Inbound struct {
 	Tag                       string              `json:"tag,omitempty"`
 	InterfaceName             string              `json:"interface_name,omitempty"`
 	MTU                       uint32              `json:"mtu,omitempty"`
-	GSO                       bool                `json:"gso,omitempty"`
-	Inet4Address              Listable[string]    `json:"inet4_address,omitempty"`
-	Inet6Address              Listable[string]    `json:"inet6_address,omitempty"`
-	AutoRoute                 bool                `json:"auto_route,omitempty"`
-	StrictRoute               bool                `json:"strict_route,omitempty"`
-	Inet4RouteAddress         Listable[string]    `json:"inet4_route_address,omitempty"`
-	Inet6RouteAddress         Listable[string]    `json:"inet6_route_address,omitempty"`
-	Inet4RouteExcludeAddress  Listable[string]    `json:"inet4_route_exclude_address,omitempty"`
-	Inet6RouteExcludeAddress  Listable[string]    `json:"inet6_route_exclude_address,omitempty"`
-	IncludeInterface          Listable[string]    `json:"include_interface,omitempty"`
-	ExcludeInterface          Listable[string]    `json:"exclude_interface,omitempty"`
-	IncludeUID                Listable[uint32]    `json:"include_uid,omitempty"`
-	IncludeUIDRange           Listable[string]    `json:"include_uid_range,omitempty"`
-	ExcludeUID                Listable[uint32]    `json:"exclude_uid,omitempty"`
-	ExcludeUIDRange           Listable[string]    `json:"exclude_uid_range,omitempty"`
-	IncludeAndroidUser        Listable[int]       `json:"include_android_user,omitempty"`
-	IncludePackage            Listable[string]    `json:"include_package,omitempty"`
-	ExcludePackage            Listable[string]    `json:"exclude_package,omitempty"`
-	EndpointIndependentNat    bool                `json:"endpoint_independent_nat,omitempty"`
+	GSO                      bool                `json:"gso,omitempty"`
+	Inet4Address             Listable[string]    `json:"inet4_address,omitempty"`
+	Inet6Address             Listable[string]    `json:"inet6_address,omitempty"`
+	AutoRoute                bool                `json:"auto_route,omitempty"`
+	StrictRoute              bool                `json:"strict_route,omitempty"`
+	Inet4RouteAddress        Listable[string]    `json:"inet4_route_address,omitempty"`
+	Inet6RouteAddress        Listable[string]    `json:"inet6_route_address,omitempty"`
+	Inet4RouteExcludeAddress Listable[string]    `json:"inet4_route_exclude_address,omitempty"`
+	Inet6RouteExcludeAddress Listable[string]    `json:"inet6_route_exclude_address,omitempty"`
+	IncludeInterface         Listable[string]    `json:"include_interface,omitempty"`
+	ExcludeInterface         Listable[string]    `json:"exclude_interface,omitempty"`
+	IncludeUID               Listable[uint32]    `json:"include_uid,omitempty"`
+	IncludeUIDRange          Listable[string]    `json:"include_uid_range,omitempty"`
+	ExcludeUID               Listable[uint32]    `json:"exclude_uid,omitempty"`
+	ExcludeUIDRange          Listable[string]    `json:"exclude_uid_range,omitempty"`
+	IncludeAndroidUser       Listable[int]       `json:"include_android_user,omitempty"`
+	IncludePackage           Listable[string]    `json:"include_package,omitempty"`
+	ExcludePackage           Listable[string]    `json:"exclude_package,omitempty"`
+	EndpointIndependentNat   bool                `json:"endpoint_independent_nat,omitempty"`
 	UDPTimeout                string              `json:"udp_timeout,omitempty"`
-	Stack                     string              `json:"stack,omitempty"`
-	Platform                  *TunPlatformOptions `json:"platform,omitempty"`
-	SniffEnabled              bool                `json:"sniff,omitempty"`
+	Stack                    string              `json:"stack,omitempty"`
+	Platform                 *TunPlatformOptions `json:"platform,omitempty"`
+	SniffEnabled             bool                `json:"sniff,omitempty"`
 	SniffOverrideDestination  bool                `json:"sniff_override_destination,omitempty"`
 	SniffTimeout              string              `json:"sniff_timeout,omitempty"`
 	DomainStrategy            string              `json:"domain_strategy,omitempty"`
@@ -227,53 +227,53 @@ type Outbound struct {
 	Version                   string                      `json:"version,omitempty"`
 	Username                  string                      `json:"username,omitempty"`
 	Password                  string                      `json:"password,omitempty"`
-	Network                   string                      `json:"network,omitempty"`
-	UDPOverTCP                *UDPOverTCPOptions          `json:"udp_over_tcp,omitempty"`
-	TLS                       *OutboundTLSOptions         `json:"tls,omitempty"`
-	Path                      string                      `json:"path,omitempty"`
-	Headers                   map[string]Listable[string] `json:"headers,omitempty"`
-	Method                    string                      `json:"method,omitempty"`
+	Network              string                      `json:"network,omitempty"`
+	UDPOverTCP           *UDPOverTCPOptions          `json:"udp_over_tcp,omitempty"`
+	TLS                  *OutboundTLSOptions         `json:"tls,omitempty"`
+	Path                 string                      `json:"path,omitempty"`
+	Headers              map[string]Listable[string] `json:"headers,omitempty"`
+	Method               string                      `json:"method,omitempty"`
 	Plugin                    string                      `json:"plugin,omitempty"`
-	PluginOptions             string                      `json:"plugin_opts,omitempty"`
-	Multiplex                 *OutboundMultiplexOptions   `json:"multiplex,omitempty"`
-	UUID                      string                      `json:"uuid,omitempty"`
+	PluginOptions        string                      `json:"plugin_opts,omitempty"`
+	Multiplex            *OutboundMultiplexOptions   `json:"multiplex,omitempty"`
+	UUID                 string                      `json:"uuid,omitempty"`
 	Security                  string                      `json:"security,omitempty"`
 	AlterId                   int                         `json:"alter_id,omitempty"`
 	GlobalPadding             bool                        `json:"global_padding,omitempty"`
 	AuthenticatedLength       bool                        `json:"authenticated_length,omitempty"`
-	PacketEncoding            string                      `json:"packet_encoding,omitempty"`
-	Transport                 *V2RayTransportOptions      `json:"transport,omitempty"`
-	SystemInterface           bool                        `json:"system_interface,omitempty"`
+	PacketEncoding       string                      `json:"packet_encoding,omitempty"`
+	Transport            *V2RayTransportOptions      `json:"transport,omitempty"`
+	SystemInterface      bool                        `json:"system_interface,omitempty"`
 	GSO                       bool                        `json:"gso,omitempty"`
-	InterfaceName             string                      `json:"interface_name,omitempty"`
-	LocalAddress              Listable[string]            `json:"local_address,omitempty"`
-	PrivateKey                string                      `json:"private_key,omitempty"`
-	Peers                     Listable[WireGuardPeer]     `json:"peers,omitempty"`
-	PeerPublicKey             string                      `json:"peer_public_key,omitempty"`
-	PreSharedKey              string                      `json:"pre_shared_key,omitempty"`
-	Reserved                  Listable[uint8]             `json:"reserved,omitempty"`
-	Workers                   int                         `json:"workers,omitempty"`
+	InterfaceName        string                      `json:"interface_name,omitempty"`
+	LocalAddress         Listable[string]            `json:"local_address,omitempty"`
+	PrivateKey           string                      `json:"private_key,omitempty"`
+	Peers                Listable[WireGuardPeer]     `json:"peers,omitempty"`
+	PeerPublicKey        string                      `json:"peer_public_key,omitempty"`
+	PreSharedKey         string                      `json:"pre_shared_key,omitempty"`
+	Reserved             Listable[uint8]             `json:"reserved,omitempty"`
+	Workers              int                         `json:"workers,omitempty"`
 	MTU                       uint32                      `json:"mtu,omitempty"`
 	Up                        string                      `json:"up,omitempty"`
 	UpMbps                    int                         `json:"up_mbps,omitempty"`
 	Down                      string                      `json:"down,omitempty"`
-	DownMbps                  int                         `json:"down_mbps,omitempty"`
-	Obfs                      *Obfs                       `json:"obfs,omitempty"`
-	Auth                      Listable[byte]              `json:"auth,omitempty"`
-	AuthString                string                      `json:"auth_str,omitempty"`
+	DownMbps             int                         `json:"down_mbps,omitempty"`
+	Obfs                 *Obfs                       `json:"obfs,omitempty"`
+	Auth                 Listable[byte]              `json:"auth,omitempty"`
+	AuthString           string                      `json:"auth_str,omitempty"`
 	ReceiveWindowConn         uint64                      `json:"recv_window_conn,omitempty"`
 	ReceiveWindow             uint64                      `json:"recv_window,omitempty"`
 	DisableMTUDiscovery       bool                        `json:"disable_mtu_discovery,omitempty"`
-	ExecutablePath            string                      `json:"executable_path,omitempty"`
-	ExtraArgs                 Listable[string]            `json:"extra_args,omitempty"`
-	DataDirectory             string                      `json:"data_directory,omitempty"`
+	ExecutablePath       string                      `json:"executable_path,omitempty"`
+	ExtraArgs            Listable[string]            `json:"extra_args,omitempty"`
+	DataDirectory        string                      `json:"data_directory,omitempty"`
 	Options                   map[string]string           `json:"torrc,omitempty"`
 	User                      string                      `json:"user,omitempty"`
 	PrivateKeyPath            string                      `json:"private_key_path,omitempty"`
-	PrivateKeyPassphrase      string                      `json:"private_key_passphrase,omitempty"`
-	HostKey                   Listable[string]            `json:"host_key,omitempty"`
-	HostKeyAlgorithms         Listable[string]            `json:"host_key_algorithms,omitempty"`
-	ClientVersion             string                      `json:"client_version,omitempty"`
+	PrivateKeyPassphrase string                      `json:"private_key_passphrase,omitempty"`
+	HostKey              Listable[string]            `json:"host_key,omitempty"`
+	HostKeyAlgorithms    Listable[string]            `json:"host_key_algorithms,omitempty"`
+	ClientVersion        string                      `json:"client_version,omitempty"`
 	ObfsParam                 string                      `json:"obfs_param,omitempty"`
 	Protocol                  string                      `json:"protocol,omitempty"`
 	ProtocolParam             string                      `json:"protocol_param,omitempty"`
@@ -284,9 +284,9 @@ type Outbound struct {
 	ZeroRTTHandshake          bool                        `json:"zero_rtt_handshake,omitempty"`
 	Heartbeat                 string                      `json:"heartbeat,omitempty"`
 	BrutalDebug               bool                        `json:"brutal_debug,omitempty"`
-	Default                   string                      `json:"default,omitempty"`
-	Outbounds                 Listable[string]            `json:"outbounds,omitempty"`
-	URL                       string                      `json:"url,omitempty"`
+	Default              string                      `json:"default,omitempty"`
+	Outbounds            Listable[string]            `json:"outbounds,omitempty"`
+	URL                  string                      `json:"url,omitempty"`
 	Interval                  string                      `json:"interval,omitempty"`
 	Tolerance                 uint16                      `json:"tolerance,omitempty"`
 	IdleTimeout               string                      `json:"idle_timeout,omitempty"`
@@ -303,11 +303,11 @@ type WireGuardPeer struct {
 }
 
 type RouteOptions struct {
-	GeoIP               *GeoIPOptions     `json:"geoip,omitempty"`
-	Geosite             *GeositeOptions   `json:"geosite,omitempty"`
-	Rules               Listable[Rule]    `json:"rules,omitempty"`
-	RuleSet             Listable[RuleSet] `json:"rule_set,omitempty"`
-	Final               string            `json:"final,omitempty"`
+	GeoIP   *GeoIPOptions     `json:"geoip,omitempty"`
+	Geosite *GeositeOptions   `json:"geosite,omitempty"`
+	Rules   Listable[Rule]    `json:"rules,omitempty"`
+	RuleSet Listable[RuleSet] `json:"rule_set,omitempty"`
+	Final   string            `json:"final,omitempty"`
 	FindProcess         bool              `json:"find_process,omitempty"`
 	AutoDetectInterface bool              `json:"auto_detect_interface,omitempty"`
 	OverrideAndroidVPN  bool              `json:"override_android_vpn,omitempty"`

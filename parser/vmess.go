@@ -6,29 +6,29 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/internal/model"
-	"sub2sing-box/internal/util"
+	model2 "sub2sing-box/model"
+	"sub2sing-box/util"
 )
 
-func ParseVmess(proxy string) (model.Proxy, error) {
+func ParseVmess(proxy string) (model2.Proxy, error) {
 	if !strings.HasPrefix(proxy, "vmess://") {
-		return model.Proxy{}, errors.New("invalid vmess url")
+		return model2.Proxy{}, errors.New("invalid vmess url")
 	}
 	base64, err := util.DecodeBase64(strings.TrimPrefix(proxy, "vmess://"))
 	if err != nil {
-		return model.Proxy{}, errors.New("invalid vmess url" + err.Error())
+		return model2.Proxy{}, errors.New("invalid vmess url" + err.Error())
 	}
-	var vmess model.VmessJson
+	var vmess model2.VmessJson
 	err = json.Unmarshal([]byte(base64), &vmess)
 	if err != nil {
-		return model.Proxy{}, errors.New("invalid vmess url" + err.Error())
+		return model2.Proxy{}, errors.New("invalid vmess url" + err.Error())
 	}
 	port := 0
 	switch vmess.Port.(type) {
 	case string:
 		port, err = strconv.Atoi(vmess.Port.(string))
 		if err != nil {
-			return model.Proxy{}, errors.New("invalid vmess url" + err.Error())
+			return model2.Proxy{}, errors.New("invalid vmess url" + err.Error())
 		}
 	case float64:
 		port = int(vmess.Port.(float64))
@@ -38,7 +38,7 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 	case string:
 		aid, err = strconv.Atoi(vmess.Aid.(string))
 		if err != nil {
-			return model.Proxy{}, errors.New("invalid vmess url" + err.Error())
+			return model2.Proxy{}, errors.New("invalid vmess url" + err.Error())
 		}
 	case float64:
 		aid = int(vmess.Aid.(float64))
@@ -52,10 +52,10 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 		name = vmess.Ps
 	}
 
-	result := model.Proxy{
+	result := model2.Proxy{
 		Type: "vmess",
 		Tag:  name,
-		VMess: model.VMess{
+		VMess: model2.VMess{
 			Server:     vmess.Add,
 			ServerPort: uint16(port),
 			UUID:       vmess.Id,
@@ -71,9 +71,9 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		tls := model.OutboundTLSOptions{
+		tls := model2.OutboundTLSOptions{
 			Enabled: true,
-			UTLS: &model.OutboundUTLSOptions{
+			UTLS: &model2.OutboundUTLSOptions{
 				Fingerprint: vmess.Fp,
 			},
 			ALPN: alpn,
@@ -88,13 +88,13 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 		if vmess.Host == "" {
 			vmess.Host = vmess.Add
 		}
-		ws := model.V2RayWebsocketOptions{
+		ws := model2.V2RayWebsocketOptions{
 			Path: vmess.Path,
 			Headers: map[string]string{
 				"Host": vmess.Host,
 			},
 		}
-		transport := model.V2RayTransportOptions{
+		transport := model2.V2RayTransportOptions{
 			Type:             "ws",
 			WebsocketOptions: ws,
 		}
@@ -102,8 +102,8 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 	}
 
 	if vmess.Net == "quic" {
-		quic := model.V2RayQUICOptions{}
-		transport := model.V2RayTransportOptions{
+		quic := model2.V2RayQUICOptions{}
+		transport := model2.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: quic,
 		}
@@ -111,11 +111,11 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 	}
 
 	if vmess.Net == "grpc" {
-		grpc := model.V2RayGRPCOptions{
+		grpc := model2.V2RayGRPCOptions{
 			ServiceName:         vmess.Path,
 			PermitWithoutStream: true,
 		}
-		transport := model.V2RayTransportOptions{
+		transport := model2.V2RayTransportOptions{
 			Type:        "grpc",
 			GRPCOptions: grpc,
 		}
@@ -123,11 +123,11 @@ func ParseVmess(proxy string) (model.Proxy, error) {
 	}
 
 	if vmess.Net == "h2" {
-		httpOps := model.V2RayHTTPOptions{
+		httpOps := model2.V2RayHTTPOptions{
 			Host: strings.Split(vmess.Host, ","),
 			Path: vmess.Path,
 		}
-		transport := model.V2RayTransportOptions{
+		transport := model2.V2RayTransportOptions{
 			Type:        "http",
 			HTTPOptions: httpOps,
 		}

@@ -2,10 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	. "sub2sing-box/pkg/util"
-
 	"github.com/spf13/cobra"
+	"os"
+	. "sub2sing-box/common"
 )
 
 var subscriptions []string

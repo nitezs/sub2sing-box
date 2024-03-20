@@ -5,30 +5,30 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/internal/model"
+	model2 "sub2sing-box/model"
 )
 
-func ParseVless(proxy string) (model.Proxy, error) {
+func ParseVless(proxy string) (model2.Proxy, error) {
 	if !strings.HasPrefix(proxy, "vless://") {
-		return model.Proxy{}, errors.New("invalid vless Url")
+		return model2.Proxy{}, errors.New("invalid vless Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "vless://"), "@", 2)
 	if len(parts) != 2 {
-		return model.Proxy{}, errors.New("invalid vless Url")
+		return model2.Proxy{}, errors.New("invalid vless Url")
 	}
 	serverInfo := strings.SplitN(parts[1], "#", 2)
 	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
 	serverAndPort := strings.SplitN(serverAndPortAndParams[0], ":", 2)
 	params, err := url.ParseQuery(serverAndPortAndParams[1])
 	if err != nil {
-		return model.Proxy{}, err
+		return model2.Proxy{}, err
 	}
 	if len(serverAndPort) != 2 {
-		return model.Proxy{}, errors.New("invalid vless Url")
+		return model2.Proxy{}, errors.New("invalid vless Url")
 	}
 	port, err := strconv.Atoi(strings.TrimSpace(serverAndPort[1]))
 	if err != nil {
-		return model.Proxy{}, err
+		return model2.Proxy{}, err
 	}
 	remarks := ""
 	if len(serverInfo) == 2 {
@@ -37,21 +37,21 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		} else {
 			remarks, err = url.QueryUnescape(serverInfo[1])
 			if err != nil {
-				return model.Proxy{}, err
+				return model2.Proxy{}, err
 			}
 		}
 	} else {
 		remarks, err = url.QueryUnescape(serverAndPort[0])
 		if err != nil {
-			return model.Proxy{}, err
+			return model2.Proxy{}, err
 		}
 	}
 	server := strings.TrimSpace(serverAndPort[0])
 	uuid := strings.TrimSpace(parts[0])
-	result := model.Proxy{
+	result := model2.Proxy{
 		Type: "vless",
 		Tag:  remarks,
-		VLESS: model.VLESS{
+		VLESS: model2.VLESS{
 			Server:     server,
 			ServerPort: uint16(port),
 			UUID:       uuid,
@@ -65,7 +65,7 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		result.VLESS.TLS = &model.OutboundTLSOptions{
+		result.VLESS.TLS = &model2.OutboundTLSOptions{
 			Enabled:  true,
 			ALPN:     alpn,
 			Insecure: params.Get("allowInsecure") == "1",
@@ -78,14 +78,14 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		result.VLESS.TLS = &model.OutboundTLSOptions{
+		result.VLESS.TLS = &model2.OutboundTLSOptions{
 			Enabled:    true,
 			ServerName: params.Get("sni"),
-			UTLS: &model.OutboundUTLSOptions{
+			UTLS: &model2.OutboundUTLSOptions{
 				Enabled:     params.Get("fp") != "",
 				Fingerprint: params.Get("fp"),
 			},
-			Reality: &model.OutboundRealityOptions{
+			Reality: &model2.OutboundRealityOptions{
 				Enabled:   true,
 				PublicKey: params.Get("pbk"),
 				ShortID:   params.Get("sid"),
@@ -94,9 +94,9 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		}
 	}
 	if params.Get("type") == "ws" {
-		result.VLESS.Transport = &model.V2RayTransportOptions{
+		result.VLESS.Transport = &model2.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model.V2RayWebsocketOptions{
+			WebsocketOptions: model2.V2RayWebsocketOptions{
 				Path: params.Get("path"),
 				Headers: map[string]string{
 					"Host": params.Get("host"),
@@ -105,15 +105,15 @@ func ParseVless(proxy string) (model.Proxy, error) {
 		}
 	}
 	if params.Get("type") == "quic" {
-		result.VLESS.Transport = &model.V2RayTransportOptions{
+		result.VLESS.Transport = &model2.V2RayTransportOptions{
 			Type:        "quic",
-			QUICOptions: model.V2RayQUICOptions{},
+			QUICOptions: model2.V2RayQUICOptions{},
 		}
 	}
 	if params.Get("type") == "grpc" {
-		result.VLESS.Transport = &model.V2RayTransportOptions{
+		result.VLESS.Transport = &model2.V2RayTransportOptions{
 			Type: "grpc",
-			GRPCOptions: model.V2RayGRPCOptions{
+			GRPCOptions: model2.V2RayGRPCOptions{
 				ServiceName: params.Get("serviceName"),
 			},
 		}
@@ -121,11 +121,11 @@ func ParseVless(proxy string) (model.Proxy, error) {
 	if params.Get("type") == "http" {
 		host, err := url.QueryUnescape(params.Get("host"))
 		if err != nil {
-			return model.Proxy{}, err
+			return model2.Proxy{}, err
 		}
-		result.VLESS.Transport = &model.V2RayTransportOptions{
+		result.VLESS.Transport = &model2.V2RayTransportOptions{
 			Type: "http",
-			HTTPOptions: model.V2RayHTTPOptions{
+			HTTPOptions: model2.V2RayHTTPOptions{
 				Host: strings.Split(host, ","),
 			},
 		}

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/internal/model"
+	model2 "sub2sing-box/model"
 )
 
 //hysteria://host:port?protocol=udp&auth=123456&peer=sni.domain&insecure=1&upmbps=100&downmbps=100&alpn=hysteria&obfs=xplus&obfsParam=123456#remarks
@@ -23,23 +23,23 @@ import (
 //- obfsParam: Obfuscation password (optional)
 //- remarks: remarks (optional)
 
-func ParseHysteria(proxy string) (model.Proxy, error) {
+func ParseHysteria(proxy string) (model2.Proxy, error) {
 	if !strings.HasPrefix(proxy, "hysteria://") {
-		return model.Proxy{}, errors.New("invalid hysteria Url")
+		return model2.Proxy{}, errors.New("invalid hysteria Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "hysteria://"), "?", 2)
 	serverInfo := strings.SplitN(parts[0], ":", 2)
 	if len(serverInfo) != 2 {
-		return model.Proxy{}, errors.New("invalid hysteria Url")
+		return model2.Proxy{}, errors.New("invalid hysteria Url")
 	}
 	params, err := url.ParseQuery(parts[1])
 	if err != nil {
-		return model.Proxy{}, errors.New("invalid hysteria Url")
+		return model2.Proxy{}, errors.New("invalid hysteria Url")
 	}
 	host := serverInfo[0]
 	port, err := strconv.Atoi(serverInfo[1])
 	if err != nil {
-		return model.Proxy{}, errors.New("invalid hysteria Url")
+		return model2.Proxy{}, errors.New("invalid hysteria Url")
 	}
 	protocol := params.Get("protocol")
 	auth := params.Get("auth")
@@ -64,12 +64,12 @@ func ParseHysteria(proxy string) (model.Proxy, error) {
 	}
 	insecureBool, err := strconv.ParseBool(insecure)
 	if err != nil {
-		return model.Proxy{}, errors.New("invalid hysteria Url")
+		return model2.Proxy{}, errors.New("invalid hysteria Url")
 	}
-	result := model.Proxy{
+	result := model2.Proxy{
 		Type: "hysteria",
 		Tag:  remarks,
-		Hysteria: model.Hysteria{
+		Hysteria: model2.Hysteria{
 			Server:     host,
 			ServerPort: uint16(port),
 			Up:         upmbps,
@@ -77,7 +77,7 @@ func ParseHysteria(proxy string) (model.Proxy, error) {
 			Auth:       []byte(auth),
 			Obfs:       obfs,
 			Network:    protocol,
-			TLS: &model.OutboundTLSOptions{
+			TLS: &model2.OutboundTLSOptions{
 				Enabled:  true,
 				Insecure: insecureBool,
 				ALPN:     alpn,
