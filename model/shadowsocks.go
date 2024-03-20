@@ -1,8 +1,8 @@
 package model
 
-type Shadowsocks struct {
-	Server        string                    `json:"server"`
-	ServerPort    uint16                    `json:"server_port"`
+type ShadowsocksOutboundOptions struct {
+	DialerOptions
+	ServerOptions
 	Method        string                    `json:"method"`
 	Password      string                    `json:"password"`
 	Plugin        string                    `json:"plugin,omitempty"`

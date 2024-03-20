@@ -5,30 +5,30 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	model2 "sub2sing-box/model"
+	"sub2sing-box/model"
 )
 
-func ParseTrojan(proxy string) (model2.Proxy, error) {
+func ParseTrojan(proxy string) (model.Outbound, error) {
 	if !strings.HasPrefix(proxy, "trojan://") {
-		return model2.Proxy{}, errors.New("invalid trojan Url")
+		return model.Outbound{}, errors.New("invalid trojan Url")
 	}
 	parts := strings.SplitN(strings.TrimPrefix(proxy, "trojan://"), "@", 2)
 	if len(parts) != 2 {
-		return model2.Proxy{}, errors.New("invalid trojan Url")
+		return model.Outbound{}, errors.New("invalid trojan Url")
 	}
 	serverInfo := strings.SplitN(parts[1], "#", 2)
 	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
 	serverAndPort := strings.SplitN(serverAndPortAndParams[0], ":", 2)
 	params, err := url.ParseQuery(serverAndPortAndParams[1])
 	if err != nil {
-		return model2.Proxy{}, err
+		return model.Outbound{}, err
 	}
 	if len(serverAndPort) != 2 {
-		return model2.Proxy{}, errors.New("invalid trojan Url")
+		return model.Outbound{}, errors.New("invalid trojan Url")
 	}
 	port, err := strconv.Atoi(strings.TrimSpace(serverAndPort[1]))
 	if err != nil {
-		return model2.Proxy{}, err
+		return model.Outbound{}, err
 	}
 	remarks := ""
 	if len(serverInfo) == 2 {
@@ -38,14 +38,16 @@ func ParseTrojan(proxy string) (model2.Proxy, error) {
 	}
 	server := strings.TrimSpace(serverAndPort[0])
 	password := strings.TrimSpace(parts[0])
-	result := model2.Proxy{
+	result := model.Outbound{
 		Type: "trojan",
 		Tag:  remarks,
-		Trojan: model2.Trojan{
-			Server:     server,
-			ServerPort: uint16(port),
-			Password:   password,
-			Network:    params.Get("type"),
+		TrojanOptions: model.TrojanOutboundOptions{
+			ServerOptions: model.ServerOptions{
+				Server:     server,
+				ServerPort: uint16(port),
+			},
+			Password: password,
+			Network:  params.Get("type"),
 		},
 	}
 	if params.Get("security") == "xtls" || params.Get("security") == "tls" {
@@ -55,31 +57,35 @@ func ParseTrojan(proxy string) (model2.Proxy, error) {
 		} else {
 			alpn = nil
 		}
-		result.Trojan.TLS = &model2.OutboundTLSOptions{
-			Enabled:    true,
-			ALPN:       alpn,
-			ServerName: params.Get("sni"),
+		result.TrojanOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
+			TLS: &model.OutboundTLSOptions{
+				Enabled:    true,
+				ALPN:       alpn,
+				ServerName: params.Get("sni"),
+			},
 		}
 	}
 	if params.Get("security") == "reality" {
-		result.Trojan.TLS = &model2.OutboundTLSOptions{
-			Enabled:    true,
-			ServerName: params.Get("sni"),
-			Reality: &model2.OutboundRealityOptions{
-				Enabled:   true,
-				PublicKey: params.Get("pbk"),
-				ShortID:   params.Get("sid"),
-			},
-			UTLS: &model2.OutboundUTLSOptions{
-				Enabled:     params.Get("fp") != "",
-				Fingerprint: params.Get("fp"),
+		result.TrojanOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
+			TLS: &model.OutboundTLSOptions{
+				Enabled:    true,
+				ServerName: params.Get("sni"),
+				Reality: &model.OutboundRealityOptions{
+					Enabled:   true,
+					PublicKey: params.Get("pbk"),
+					ShortID:   params.Get("sid"),
+				},
+				UTLS: &model.OutboundUTLSOptions{
+					Enabled:     params.Get("fp") != "",
+					Fingerprint: params.Get("fp"),
+				},
 			},
 		}
 	}
 	if params.Get("type") == "ws" {
-		result.Trojan.Transport = &model2.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model2.V2RayWebsocketOptions{
+			WebsocketOptions: model.V2RayWebsocketOptions{
 				Path: params.Get("path"),
 				Headers: map[string]string{
 					"Host": params.Get("host"),
@@ -88,24 +94,24 @@ func ParseTrojan(proxy string) (model2.Proxy, error) {
 		}
 	}
 	if params.Get("type") == "http" {
-		result.Trojan.Transport = &model2.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type: "http",
-			HTTPOptions: model2.V2RayHTTPOptions{
+			HTTPOptions: model.V2RayHTTPOptions{
 				Host: []string{params.Get("host")},
 				Path: params.Get("path"),
 			},
 		}
 	}
 	if params.Get("type") == "quic" {
-		result.Trojan.Transport = &model2.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type:        "quic",
-			QUICOptions: model2.V2RayQUICOptions{},
+			QUICOptions: model.V2RayQUICOptions{},
 		}
 	}
 	if params.Get("type") == "grpc" {
-		result.Trojan.Transport = &model2.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type: "grpc",
-			GRPCOptions: model2.V2RayGRPCOptions{
+			GRPCOptions: model.V2RayGRPCOptions{
 				ServiceName: params.Get("serviceName"),
 			},
 		}

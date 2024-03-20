@@ -34,3 +34,7 @@ type OutboundRealityOptions struct {
 	PublicKey string `json:"public_key,omitempty"`
 	ShortID   string `json:"short_id,omitempty"`
 }
+
+type OutboundTLSOptionsContainer struct {
+	TLS *OutboundTLSOptions `json:"tls,omitempty"`
+}
