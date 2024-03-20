@@ -69,34 +69,24 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		}
 		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
 			TLS: &model.OutboundTLSOptions{
-				Enabled:  true,
-				ALPN:     alpn,
-				Insecure: params.Get("allowInsecure") == "1",
+				Enabled:    true,
+				ALPN:       alpn,
+				ServerName: params.Get("sni"),
+				Insecure:   params.Get("allowInsecure") == "1",
 			},
+		}
+		if params.Get("fp") != "" {
+			result.VLESSOptions.OutboundTLSOptionsContainer.TLS.UTLS = &model.OutboundUTLSOptions{
+				Enabled:     true,
+				Fingerprint: params.Get("fp"),
+			}
 		}
 	}
 	if params.Get("security") == "reality" {
-		var alpn []string
-		if strings.Contains(params.Get("alpn"), ",") {
-			alpn = strings.Split(params.Get("alpn"), ",")
-		} else {
-			alpn = nil
-		}
-		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
-				Enabled:    true,
-				ServerName: params.Get("sni"),
-				UTLS: &model.OutboundUTLSOptions{
-					Enabled:     params.Get("fp") != "",
-					Fingerprint: params.Get("fp"),
-				},
-				Reality: &model.OutboundRealityOptions{
-					Enabled:   true,
-					PublicKey: params.Get("pbk"),
-					ShortID:   params.Get("sid"),
-				},
-				ALPN: alpn,
-			},
+		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.Reality = &model.OutboundRealityOptions{
+			Enabled:   true,
+			PublicKey: params.Get("pbk"),
+			ShortID:   params.Get("sid"),
 		}
 	}
 	if params.Get("type") == "ws" {
@@ -114,11 +104,6 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: model.V2RayQUICOptions{},
-		}
-		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
-				Enabled: true,
-			},
 		}
 	}
 	if params.Get("type") == "grpc" {

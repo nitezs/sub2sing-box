@@ -79,8 +79,15 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 				UTLS: &model.OutboundUTLSOptions{
 					Fingerprint: vmess.Fp,
 				},
-				ALPN: alpn,
+				ALPN:       alpn,
+				ServerName: vmess.Sni,
 			},
+		}
+		if vmess.Fp != "" {
+			result.VMessOptions.OutboundTLSOptionsContainer.TLS.UTLS = &model.OutboundUTLSOptions{
+				Enabled:     true,
+				Fingerprint: vmess.Fp,
+			}
 		}
 	}
 
@@ -107,11 +114,6 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		result.VMessOptions.Transport = &model.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: quic,
-		}
-		result.VMessOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
-				Enabled: true,
-			},
 		}
 	}
 
