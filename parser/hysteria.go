@@ -1,78 +1,76 @@
 package parser
 
 import (
-	"errors"
 	"net/url"
 	"strconv"
 	"strings"
+	"sub2sing-box/constant"
 	"sub2sing-box/model"
 )
 
-//hysteria://host:port?protocol=udp&auth=123456&peer=sni.domain&insecure=1&upmbps=100&downmbps=100&alpn=hysteria&obfs=xplus&obfsParam=123456#remarks
-//
-//- host: hostname or IP address of the server to connect to (required)
-//- port: port of the server to connect to (required)
-//- protocol: protocol to use ("udp", "wechat-video", "faketcp") (optional, default: "udp")
-//- auth: authentication payload (string) (optional)
-//- peer: SNI for TLS (optional)
-//- insecure: ignore certificate errors (optional)
-//- upmbps: upstream bandwidth in Mbps (required)
-//- downmbps: downstream bandwidth in Mbps (required)
-//- alpn: QUIC ALPN (optional)
-//- obfs: Obfuscation mode (optional, empty or "xplus")
-//- obfsParam: Obfuscation password (optional)
-//- remarks: remarks (optional)
-
 func ParseHysteria(proxy string) (model.Outbound, error) {
-	if !strings.HasPrefix(proxy, "hysteria://") {
-		return model.Outbound{}, errors.New("invalid hysteria Url")
+	if !strings.HasPrefix(proxy, constant.HysteriaPrefix) {
+		return model.Outbound{}, &ParseError{Type: ErrInvalidPrefix, Raw: proxy}
 	}
-	parts := strings.SplitN(strings.TrimPrefix(proxy, "hysteria://"), "?", 2)
-	serverInfo := strings.SplitN(parts[0], ":", 2)
+
+	proxy = strings.TrimPrefix(proxy, constant.HysteriaPrefix)
+	urlParts := strings.SplitN(proxy, "?", 2)
+	if len(urlParts) != 2 {
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidStruct,
+			Message: "missing character '?' in url",
+			Raw:     proxy,
+		}
+	}
+
+	serverInfo := strings.SplitN(urlParts[0], ":", 2)
 	if len(serverInfo) != 2 {
-		return model.Outbound{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidStruct,
+			Message: "missing server host or port",
+			Raw:     proxy,
+		}
 	}
-	params, err := url.ParseQuery(parts[1])
+	server, portStr := serverInfo[0], serverInfo[1]
+
+	port, err := ParsePort(portStr)
 	if err != nil {
-		return model.Outbound{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, err
 	}
-	host := serverInfo[0]
-	port, err := strconv.Atoi(serverInfo[1])
+
+	params, err := url.ParseQuery(urlParts[1])
 	if err != nil {
-		return model.Outbound{}, errors.New("invalid hysteria Url")
+		return model.Outbound{}, &ParseError{
+			Type:    ErrCannotParseParams,
+			Raw:     proxy,
+			Message: err.Error(),
+		}
 	}
-	protocol := params.Get("protocol")
-	auth := params.Get("auth")
-	// peer := params.Get("peer")
-	insecure := params.Get("insecure")
-	upmbps := params.Get("upmbps")
-	downmbps := params.Get("downmbps")
-	obfs := params.Get("obfs")
-	// obfsParam := params.Get("obfsParam")
-	var alpn []string
-	if params.Get("alpn") != "" {
-		alpn = strings.Split(params.Get("alpn"), ",")
-	} else {
-		alpn = nil
-	}
-	remarks := ""
-	if strings.Contains(parts[1], "#") {
-		r := strings.Split(parts[1], "#")
-		remarks = r[len(r)-1]
-	} else {
-		remarks = serverInfo[0] + ":" + serverInfo[1]
-	}
+
+	protocol, auth, insecure, upmbps, downmbps, obfs, alpnStr := params.Get("protocol"), params.Get("auth"), params.Get("insecure"), params.Get("upmbps"), params.Get("downmbps"), params.Get("obfs"), params.Get("alpn")
 	insecureBool, err := strconv.ParseBool(insecure)
 	if err != nil {
-		return model.Outbound{}, errors.New("invalid hysteria Url")
+		insecureBool = false
 	}
-	result := model.Outbound{
+
+	var alpn []string
+	alpnStr = strings.TrimSpace(alpnStr)
+	if alpnStr != "" {
+		alpn = strings.Split(alpnStr, ",")
+	}
+
+	remarks := server + ":" + portStr
+	if params.Get("remarks") != "" {
+		remarks = params.Get("remarks")
+	}
+
+	return model.Outbound{
 		Type: "hysteria",
 		Tag:  remarks,
 		HysteriaOptions: model.HysteriaOutboundOptions{
 			ServerOptions: model.ServerOptions{
-				Server:     host,
-				ServerPort: uint16(port),
+				Server:     server,
+				ServerPort: port,
 			},
 			Up:      upmbps,
 			Down:    downmbps,
@@ -87,6 +85,5 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 				},
 			},
 		},
-	}
-	return result, nil
+	}, nil
 }
