@@ -2,9 +2,10 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
-	. "sub2sing-box/common"
+	"sub2sing-box/common"
+
+	"github.com/spf13/cobra"
 )
 
 var subscriptions []string
@@ -39,7 +40,7 @@ var convertCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		result := ""
 		var err error
-		result, err = Convert(
+		result, err = common.Convert(
 			subscriptions,
 			proxies,
 			template,

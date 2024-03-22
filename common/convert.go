@@ -233,7 +233,7 @@ func ConvertCProxyToSProxy(proxy string) (model.Outbound, error) {
 			return proxy, nil
 		}
 	}
-	return model.Outbound{}, errors.New("Unknown proxy format")
+	return model.Outbound{}, errors.New("unknown proxy format")
 }
 
 func ConvertCProxyToJson(proxy string) (string, error) {

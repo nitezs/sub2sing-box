@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"sub2sing-box/api/model"
 	"sub2sing-box/common"
-	putil "sub2sing-box/util"
+	"sub2sing-box/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +17,7 @@ func Convert(c *gin.Context) {
 		})
 		return
 	}
-	j, err := putil.DecodeBase64(c.Query("data"))
+	j, err := util.DecodeBase64(c.Query("data"))
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": "Invalid data",

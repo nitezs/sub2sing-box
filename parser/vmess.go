@@ -2,47 +2,53 @@ package parser
 
 import (
 	"encoding/json"
-	"errors"
 	"net/url"
 	"strconv"
 	"strings"
+	"sub2sing-box/constant"
 	"sub2sing-box/model"
 	"sub2sing-box/util"
 )
 
 func ParseVmess(proxy string) (model.Outbound, error) {
-	if !strings.HasPrefix(proxy, "vmess://") {
-		return model.Outbound{}, errors.New("invalid vmess url")
+	if !strings.HasPrefix(proxy, constant.VMessPrefix) {
+		return model.Outbound{}, &ParseError{Type: ErrInvalidPrefix, Raw: proxy}
 	}
-	base64, err := util.DecodeBase64(strings.TrimPrefix(proxy, "vmess://"))
+
+	proxy = strings.TrimPrefix(proxy, constant.VMessPrefix)
+	base64, err := util.DecodeBase64(proxy)
 	if err != nil {
-		return model.Outbound{}, errors.New("invalid vmess url" + err.Error())
+		return model.Outbound{}, &ParseError{Type: ErrInvalidBase64, Raw: proxy, Message: err.Error()}
 	}
+
 	var vmess model.VmessJson
 	err = json.Unmarshal([]byte(base64), &vmess)
 	if err != nil {
-		return model.Outbound{}, errors.New("invalid vmess url" + err.Error())
+		return model.Outbound{}, &ParseError{Type: ErrInvalidStruct, Raw: proxy, Message: err.Error()}
 	}
-	port := 0
+
+	var port uint16
 	switch vmess.Port.(type) {
 	case string:
-		port, err = strconv.Atoi(vmess.Port.(string))
+		port, err = ParsePort(vmess.Port.(string))
 		if err != nil {
-			return model.Outbound{}, errors.New("invalid vmess url" + err.Error())
+			return model.Outbound{}, err
 		}
 	case float64:
-		port = int(vmess.Port.(float64))
+		port = uint16(vmess.Port.(float64))
 	}
+
 	aid := 0
 	switch vmess.Aid.(type) {
 	case string:
 		aid, err = strconv.Atoi(vmess.Aid.(string))
 		if err != nil {
-			return model.Outbound{}, errors.New("invalid vmess url" + err.Error())
+			return model.Outbound{}, &ParseError{Type: ErrInvalidStruct, Raw: proxy, Message: err.Error()}
 		}
 	case float64:
 		aid = int(vmess.Aid.(float64))
 	}
+
 	if vmess.Scy == "" {
 		vmess.Scy = "auto"
 	}
@@ -58,7 +64,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		VMessOptions: model.VMessOutboundOptions{
 			ServerOptions: model.ServerOptions{
 				Server:     vmess.Add,
-				ServerPort: uint16(port),
+				ServerPort: port,
 			},
 			UUID:     vmess.Id,
 			AlterId:  aid,
