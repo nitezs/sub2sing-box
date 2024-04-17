@@ -3,8 +3,8 @@ package handler
 import (
 	"encoding/json"
 	"sub2sing-box/api/model"
-	iutil "sub2sing-box/internal/util"
-	putil "sub2sing-box/pkg/util"
+	"sub2sing-box/common"
+	"sub2sing-box/util"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,7 +17,7 @@ func Convert(c *gin.Context) {
 		})
 		return
 	}
-	j, err := iutil.DecodeBase64(c.Query("data"))
+	j, err := util.DecodeBase64(c.Query("data"))
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": "Invalid data",
@@ -38,7 +38,7 @@ func Convert(c *gin.Context) {
 		})
 		return
 	}
-	result, err := putil.Convert(
+	result, err := common.Convert(
 		data.Subscriptions,
 		data.Proxies,
 		data.Template,

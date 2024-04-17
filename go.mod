@@ -2,7 +2,10 @@ module sub2sing-box
 
 go 1.21.5
 
-require github.com/spf13/cobra v1.8.0
+require (
+	github.com/spf13/cobra v1.8.0
+	golang.org/x/text v0.9.0
+)
 
 require (
 	github.com/bytedance/sonic v1.9.1 // indirect
@@ -26,7 +29,6 @@ require (
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/protobuf v1.30.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

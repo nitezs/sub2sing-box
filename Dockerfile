@@ -8,7 +8,7 @@ RUN go mod download
 
 ARG version
 
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X sub2clash/config.Version=${version}" -o sub2sing-box main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X sub2sing-box/constant.Version=${version}" -o sub2sing-box main.go
 
 WORKDIR /app
 
