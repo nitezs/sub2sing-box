@@ -26,7 +26,3 @@ archives:
       - LICENSE
       - README.md
       - templates
-release:
-  github:
-    owner: nitezs
-    name: sub2sing-box
