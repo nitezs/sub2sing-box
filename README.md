@@ -1,5 +1,5 @@
-# sub2sing-box
-
+> [!important]
+> [moved to forgejo](https://git.nite07.com/nite07/sub2sing-box)# sub2sing-box
 ## cli
 
 - convert: 转换
