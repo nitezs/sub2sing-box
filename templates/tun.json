@@ -13,20 +13,12 @@
         "tag": "local",
         "address": "https://223.5.5.5/dns-query",
         "detour": "direct"
-      },
-      {
-        "tag": "remote",
-        "address": "fakeip"
       }
     ],
     "rules": [
       {
         "outbound": "any",
         "server": "local"
-      },
-      {
-        "query_type": ["A", "AAAA"],
-        "server": "remote"
       },
       {
         "clash_mode": "Direct",
@@ -54,13 +46,7 @@
         "server": "google",
         "client_subnet": "114.114.114.114"
       }
-    ],
-    "fakeip": {
-      "enabled": true,
-      "inet4_range": "198.18.0.0/15",
-      "inet6_range": "fc00::/18"
-    },
-    "independent_cache": true
+    ]
   },
   "route": {
     "rule_set": [
@@ -143,20 +129,24 @@
         "outbound": "dns-out"
       },
       {
-        "ip_is_private": true,
+        "rule_set": "geosite-geolocation-!cn",
+        "outbound": "节点选择"
+      },
+      {
+        "rule_set": "geosite-geolocation-cn",
         "outbound": "direct"
       },
       {
-        "rule_set": ["geoip-cn", "geosite-geolocation-cn"],
+        "rule_set": "geoip-cn",
+        "outbound": "direct"
+      },
+      {
+        "ip_is_private": true,
         "outbound": "direct"
       },
       {
         "rule_set": "geosite-category-ads-all",
         "outbound": "Ads"
-      },
-      {
-        "rule_set": "geosite-microsoft",
-        "outbound": "Microsoft"
       },
       {
         "rule_set": "geosite-bilibili",
@@ -184,7 +174,7 @@
       "inet4_address": "172.19.0.1/30",
       "inet6_address": "fdfe:dcba:9876::1/126",
       "auto_route": true,
-      "strict_route": true,
+      "strict_route": false,
       "sniff": true,
       "sniff_override_destination": false
     }
@@ -201,13 +191,6 @@
       "tag": "Ads",
       "outbounds": ["direct", "block"],
       "default": "block",
-      "interrupt_exist_connections": true
-    },
-    {
-      "type": "selector",
-      "tag": "Microsoft",
-      "outbounds": ["节点选择", "<all-proxy-tags>", "direct"],
-      "default": "节点选择",
       "interrupt_exist_connections": true
     },
     {

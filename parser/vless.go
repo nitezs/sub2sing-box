@@ -130,7 +130,12 @@ func ParseVless(proxy string) (model.Outbound, error) {
 				Path: path,
 			},
 		}
-		result.VLESSOptions.Transport.WebsocketOptions.Headers["Host"] = host
+		if host != "" {
+			if result.VLESSOptions.Transport.WebsocketOptions.Headers == nil {
+				result.VLESSOptions.Transport.WebsocketOptions.Headers = make(map[string]string)
+			}
+			result.VLESSOptions.Transport.WebsocketOptions.Headers["Host"] = host
+		}
 	}
 
 	if params.Get("type") == "quic" {
