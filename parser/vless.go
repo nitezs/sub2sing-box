@@ -42,7 +42,11 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	server, portStr := serverAndPort[0], serverAndPort[1]
 	port, err := ParsePort(portStr)
 	if err != nil {
-		return model.Outbound{}, err
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidPort,
+			Message: err.Error(),
+			Raw:     proxy,
+		}
 	}
 
 	params, err := url.ParseQuery(serverAndPortAndParams[1])
@@ -76,7 +80,7 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	}
 
 	uuid := strings.TrimSpace(urlParts[0])
-	flow, security, alpnStr, sni, insecure, fp, pbk, sid, path, host, serviceName := params.Get("flow"), params.Get("security"), params.Get("alpn"), params.Get("sni"), params.Get("allowInsecure"), params.Get("fp"), params.Get("pbk"), params.Get("sid"), params.Get("path"), params.Get("host"), params.Get("serviceName")
+	flow, security, alpnStr, sni, insecure, fp, pbk, sid, path, host, serviceName, _type := params.Get("flow"), params.Get("security"), params.Get("alpn"), params.Get("sni"), params.Get("allowInsecure"), params.Get("fp"), params.Get("pbk"), params.Get("sid"), params.Get("path"), params.Get("host"), params.Get("serviceName"), params.Get("type")
 
 	enableUTLS := fp != ""
 	insecureBool := insecure == "1"
@@ -123,7 +127,7 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if params.Get("type") == "ws" {
+	if _type == "ws" {
 		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type: "ws",
 			WebsocketOptions: model.V2RayWebsocketOptions{
@@ -138,14 +142,14 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if params.Get("type") == "quic" {
+	if _type == "quic" {
 		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: model.V2RayQUICOptions{},
 		}
 	}
 
-	if params.Get("type") == "grpc" {
+	if _type == "grpc" {
 		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
 			Type: "grpc",
 			GRPCOptions: model.V2RayGRPCOptions{
@@ -154,7 +158,7 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if params.Get("type") == "http" {
+	if _type == "http" {
 		hosts, err := url.QueryUnescape(host)
 		if err != nil {
 			return model.Outbound{}, &ParseError{

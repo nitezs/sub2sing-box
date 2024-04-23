@@ -54,7 +54,11 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 
 	port, err := ParsePort(portStr)
 	if err != nil {
-		return model.Outbound{}, err
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidPort,
+			Message: err.Error(),
+			Raw:     proxy,
+		}
 	}
 
 	remarks := ""
@@ -98,7 +102,7 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if params.Get("security") == "reality" {
+	if security == "reality" {
 		result.TrojanOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
 			TLS: &model.OutboundTLSOptions{
 				Enabled:    true,
@@ -116,7 +120,7 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if params.Get("type") == "ws" {
+	if network == "ws" {
 		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type: "ws",
 			WebsocketOptions: model.V2RayWebsocketOptions{
@@ -128,24 +132,24 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if params.Get("type") == "http" {
+	if network == "http" {
 		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type: "http",
 			HTTPOptions: model.V2RayHTTPOptions{
 				Host: []string{host},
-				Path: params.Get("path"),
+				Path: path,
 			},
 		}
 	}
 
-	if params.Get("type") == "quic" {
+	if network == "quic" {
 		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: model.V2RayQUICOptions{},
 		}
 	}
 
-	if params.Get("type") == "grpc" {
+	if network == "grpc" {
 		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
 			Type: "grpc",
 			GRPCOptions: model.V2RayGRPCOptions{

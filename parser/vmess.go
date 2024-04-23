@@ -32,7 +32,11 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 	case string:
 		port, err = ParsePort(vmess.Port.(string))
 		if err != nil {
-			return model.Outbound{}, err
+			return model.Outbound{}, &ParseError{
+				Type:    ErrInvalidPort,
+				Message: err.Error(),
+				Raw:     proxy,
+			}
 		}
 	case float64:
 		port = uint16(vmess.Port.(float64))

@@ -35,7 +35,11 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 
 	port, err := ParsePort(portStr)
 	if err != nil {
-		return model.Outbound{}, err
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidPort,
+			Message: err.Error(),
+			Raw:     proxy,
+		}
 	}
 
 	params, err := url.ParseQuery(urlParts[1])
