@@ -1,6 +1,6 @@
 # sub2sing-box
 
-## cli
+## 控制台命令
 
 - convert: 转换
 - server: 启动 Web UI
@@ -8,17 +8,17 @@
 
 `sub2sing-box <command> -h` 查看帮助
 
-## api
+## Api
 
 ### GET /convert?data=xxx
 
-data 为 base64 URL 编码的请求体，示例
+data 为 base64 URL 编码(将编码字符串中`/`替换为`_`，`+`替换为`-`)的 JSON 结构体，示例
 
 ```
 {
   "subscriptions": ["订阅地址1", "订阅地址2"],
   "proxies": ["代理1", "代理2"],
-  "template": "模板路径",
+  "template": "模板路径/网络地址",
   "delete": "",
   "rename": {"原文本": "新文本"},
   "group": false,
