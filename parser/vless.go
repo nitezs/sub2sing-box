@@ -120,6 +120,14 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	}
 
 	if security == "reality" {
+		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
+			TLS: &model.OutboundTLSOptions{
+				Enabled:    true,
+				ALPN:       alpn,
+				ServerName: sni,
+				Insecure:   insecureBool,
+			},
+		}
 		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.Reality = &model.OutboundRealityOptions{
 			Enabled:   true,
 			PublicKey: pbk,
