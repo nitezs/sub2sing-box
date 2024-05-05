@@ -111,11 +111,11 @@ func ParseVless(proxy string) (model.Outbound, error) {
 				ALPN:       alpn,
 				ServerName: sni,
 				Insecure:   insecureBool,
+				UTLS: &model.OutboundUTLSOptions{
+					Enabled:     enableUTLS,
+					Fingerprint: fp,
+				},
 			},
-		}
-		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.UTLS = &model.OutboundUTLSOptions{
-			Enabled:     enableUTLS,
-			Fingerprint: fp,
 		}
 	}
 
@@ -126,12 +126,16 @@ func ParseVless(proxy string) (model.Outbound, error) {
 				ALPN:       alpn,
 				ServerName: sni,
 				Insecure:   insecureBool,
+				UTLS: &model.OutboundUTLSOptions{
+					Enabled:     enableUTLS,
+					Fingerprint: fp,
+				},
+				Reality: &model.OutboundRealityOptions{
+					Enabled:   true,
+					PublicKey: pbk,
+					ShortID:   sid,
+				},
 			},
-		}
-		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.Reality = &model.OutboundRealityOptions{
-			Enabled:   true,
-			PublicKey: pbk,
-			ShortID:   sid,
 		}
 	}
 
