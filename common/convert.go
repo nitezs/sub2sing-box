@@ -161,7 +161,11 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 func MergeTemplate(outbounds []model.Outbound, template string) (string, error) {
 	var config model.Config
 	var err error
-	if strings.HasPrefix(template, "http") {
+	isNetworkFile, err := regexp.MatchString(`^https?://`, template)
+	if err != nil {
+		return "", err
+	}
+	if isNetworkFile {
 		data, err := util.Fetch(template, 3)
 		if err != nil {
 			return "", err
