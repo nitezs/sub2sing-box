@@ -176,8 +176,9 @@ func MergeTemplate(outbounds []model.Outbound, template string) (string, error) 
 		}
 	} else {
 		if !strings.Contains(template, string(filepath.Separator)) {
-			if _, err := os.Stat(template); os.IsNotExist(err) {
-				template = filepath.Join("templates", template)
+			path := filepath.Join("templates", template)
+			if _, err := os.Stat(path); err == nil {
+				template = path
 			}
 		}
 		config, err = ReadTemplate(template)

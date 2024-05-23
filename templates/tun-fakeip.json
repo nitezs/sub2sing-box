@@ -191,9 +191,7 @@
       "sniff_override_destination": true,
       "strict_route": true,
       "type": "tun",
-      "stack": "mixed",
-      "inet4_route_exclude_address": ["100.64.0.0/10"],
-      "inet6_route_exclude_address": ["fd7a:115c:a1e0::/48"]
+      "stack": "mixed"
     }
   ],
   "outbounds": [
