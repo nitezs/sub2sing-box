@@ -23,7 +23,6 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	var serverAndPort []string
 	if !strings.Contains(urlParts[0], ":") {
 		decoded, err := util.DecodeBase64(urlParts[0])
 		if err != nil {
@@ -45,16 +44,21 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 	}
 	method, password := credentials[0], credentials[1]
 
-	serverInfo := strings.SplitN(urlParts[1], "#", 2)
-	serverAndPort = strings.SplitN(serverInfo[0], ":", 2)
-	server, portStr := serverAndPort[0], serverAndPort[1]
-	if len(serverInfo) != 2 {
+	serverInfoAndTag := strings.SplitN(urlParts[1], "#", 2)
+	serverAndPort := serverInfoAndTag[0]
+
+	lastColonIndex := strings.LastIndex(serverAndPort, ":")
+	if lastColonIndex == -1 {
 		return model.Outbound{}, &ParseError{
 			Type:    ErrInvalidStruct,
-			Message: "missing server host or port",
+			Message: "missing port in address",
 			Raw:     proxy,
 		}
 	}
+
+	server := serverAndPort[:lastColonIndex]
+	portStr := serverAndPort[lastColonIndex+1:]
+
 	port, err := ParsePort(portStr)
 	if err != nil {
 		return model.Outbound{}, &ParseError{
@@ -65,8 +69,8 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 	}
 
 	var remarks string
-	if len(serverInfo) == 2 {
-		unescape, err := url.QueryUnescape(serverInfo[1])
+	if len(serverInfoAndTag) == 2 {
+		unescape, err := url.QueryUnescape(serverInfoAndTag[1])
 		if err != nil {
 			return model.Outbound{}, &ParseError{
 				Type:    ErrInvalidStruct,
