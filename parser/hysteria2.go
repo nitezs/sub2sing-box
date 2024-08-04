@@ -54,7 +54,7 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 		}
 	}
 	network, obfs, obfsPassword, pinSHA256, insecure, sni := query.Get("network"), query.Get("obfs"), query.Get("obfs-password"), query.Get("pinSHA256"), query.Get("insecure"), query.Get("sni")
-	enableTLS := pinSHA256 != ""
+	enableTLS := pinSHA256 != "" || sni != ""
 	insecureBool := insecure == "1"
 	remarks := link.Fragment
 	if remarks == "" {
@@ -71,18 +71,24 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 				ServerPort: port,
 			},
 			Password: password,
-			Obfs: &model.Hysteria2Obfs{
-				Type:     obfs,
-				Password: obfsPassword,
-			},
 			OutboundTLSOptionsContainer: model.OutboundTLSOptionsContainer{
-				TLS: &model.OutboundTLSOptions{Enabled: enableTLS,
-					Insecure:    insecureBool,
-					ServerName:  sni,
-					Certificate: []string{pinSHA256}},
+				TLS: &model.OutboundTLSOptions{
+					Enabled:    enableTLS,
+					Insecure:   insecureBool,
+					ServerName: sni,
+				},
 			},
 			Network: network,
 		},
+	}
+	if pinSHA256 != "" {
+		result.Hysteria2Options.OutboundTLSOptionsContainer.TLS.Certificate = []string{pinSHA256}
+	}
+	if obfs != "" {
+		result.Hysteria2Options.Obfs = &model.Hysteria2Obfs{
+			Type:     obfs,
+			Password: obfsPassword,
+		}
 	}
 	return result, nil
 }

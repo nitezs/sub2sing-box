@@ -260,7 +260,10 @@ func ConvertSubscriptionsToSProxy(urls []string) ([]model.Outbound, error) {
 		if err != nil {
 			return nil, err
 		}
-		proxy, err := util.DecodeBase64(data)
+		proxy := data
+		if !strings.Contains(data, "://") {
+			proxy, err = util.DecodeBase64(data)
+		}
 		if err != nil {
 			return nil, err
 		}
