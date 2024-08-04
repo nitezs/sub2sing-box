@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"sub2sing-box/constant"
@@ -12,43 +13,30 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		return model.Outbound{}, &ParseError{Type: ErrInvalidPrefix, Raw: proxy}
 	}
 
-	proxy = strings.TrimPrefix(proxy, constant.TrojanPrefix)
-	urlParts := strings.SplitN(proxy, "@", 2)
-	if len(urlParts) != 2 {
-		return model.Outbound{}, &ParseError{
-			Type:    ErrInvalidStruct,
-			Message: "missing character '@' in url",
-			Raw:     proxy,
-		}
-	}
-	password := strings.TrimSpace(urlParts[0])
-
-	serverInfo := strings.SplitN(urlParts[1], "#", 2)
-	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
-	if len(serverAndPortAndParams) != 2 {
-		return model.Outbound{}, &ParseError{
-			Type:    ErrInvalidStruct,
-			Message: "missing character '?' in url",
-			Raw:     proxy,
-		}
-	}
-
-	serverAndPort := strings.SplitN(serverAndPortAndParams[0], ":", 2)
-	if len(serverAndPort) != 2 {
-		return model.Outbound{}, &ParseError{
-			Type:    ErrInvalidStruct,
-			Message: "missing server host or port",
-			Raw:     proxy,
-		}
-	}
-	server, portStr := serverAndPort[0], serverAndPort[1]
-
-	params, err := url.ParseQuery(serverAndPortAndParams[1])
+	link, err := url.Parse(proxy)
 	if err != nil {
 		return model.Outbound{}, &ParseError{
-			Type:    ErrCannotParseParams,
+			Type:    ErrInvalidStruct,
+			Message: "url parse error",
 			Raw:     proxy,
-			Message: err.Error(),
+		}
+	}
+
+	password := link.User.Username()
+	server := link.Hostname()
+	if server == "" {
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidStruct,
+			Message: "missing server host",
+			Raw:     proxy,
+		}
+	}
+	portStr := link.Port()
+	if portStr == "" {
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidStruct,
+			Message: "missing server port",
+			Raw:     proxy,
 		}
 	}
 
@@ -61,14 +49,14 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	remarks := ""
-	if len(serverInfo) == 2 {
-		remarks, _ = url.QueryUnescape(strings.TrimSpace(serverInfo[1]))
-	} else {
-		remarks = serverAndPort[0]
+	remarks := link.Fragment
+	if remarks == "" {
+		remarks = fmt.Sprintf("%s:%s", server, portStr)
 	}
+	remarks = strings.TrimSpace(remarks)
 
-	network, security, alpnStr, sni, pbk, sid, fp, path, host, serviceName := params.Get("type"), params.Get("security"), params.Get("alpn"), params.Get("sni"), params.Get("pbk"), params.Get("sid"), params.Get("fp"), params.Get("path"), params.Get("host"), params.Get("serviceName")
+	query := link.Query()
+	network, security, alpnStr, sni, pbk, sid, fp, path, host, serviceName, allowInsecure := query.Get("type"), query.Get("security"), query.Get("alpn"), query.Get("sni"), query.Get("pbk"), query.Get("sid"), query.Get("fp"), query.Get("path"), query.Get("host"), query.Get("serviceName"), query.Get("allowInsecure")
 
 	var alpn []string
 	if strings.Contains(alpnStr, ",") {
@@ -92,12 +80,13 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		},
 	}
 
-	if security == "xtls" || security == "tls" {
+	if security == "xtls" || security == "tls" || sni != "" {
 		result.TrojanOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
 			TLS: &model.OutboundTLSOptions{
 				Enabled:    true,
 				ALPN:       alpn,
 				ServerName: sni,
+				Insecure:   allowInsecure == "1",
 			},
 		}
 	}
@@ -116,6 +105,7 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 					Enabled:     enableUTLS,
 					Fingerprint: fp,
 				},
+				Insecure: allowInsecure == "1",
 			},
 		}
 	}

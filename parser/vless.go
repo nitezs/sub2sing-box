@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"net/url"
 	"strings"
 	"sub2sing-box/constant"
@@ -12,34 +13,24 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		return model.Outbound{}, &ParseError{Type: ErrInvalidPrefix, Raw: proxy}
 	}
 
-	urlParts := strings.SplitN(strings.TrimPrefix(proxy, constant.VLESSPrefix), "@", 2)
-	if len(urlParts) != 2 {
+	link, err := url.Parse(proxy)
+	if err != nil {
 		return model.Outbound{}, &ParseError{
 			Type:    ErrInvalidStruct,
-			Message: "missing character '@' in url",
+			Message: "url parse error",
 			Raw:     proxy,
 		}
 	}
 
-	serverInfo := strings.SplitN(urlParts[1], "#", 2)
-	serverAndPortAndParams := strings.SplitN(serverInfo[0], "?", 2)
-	if len(serverAndPortAndParams) != 2 {
+	server := link.Hostname()
+	if server == "" {
 		return model.Outbound{}, &ParseError{
 			Type:    ErrInvalidStruct,
-			Message: "missing character '?' in url",
+			Message: "missing server host",
 			Raw:     proxy,
 		}
 	}
-
-	serverAndPort := strings.SplitN(serverAndPortAndParams[0], ":", 2)
-	if len(serverAndPort) != 2 {
-		return model.Outbound{}, &ParseError{
-			Type:    ErrInvalidStruct,
-			Message: "missing server host or port",
-			Raw:     proxy,
-		}
-	}
-	server, portStr := serverAndPort[0], serverAndPort[1]
+	portStr := link.Port()
 	port, err := ParsePort(portStr)
 	if err != nil {
 		return model.Outbound{}, &ParseError{
@@ -49,38 +40,9 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	params, err := url.ParseQuery(serverAndPortAndParams[1])
-	if err != nil {
-		return model.Outbound{}, &ParseError{
-			Type:    ErrCannotParseParams,
-			Raw:     proxy,
-			Message: err.Error(),
-		}
-	}
-
-	remarks := ""
-	if len(serverInfo) == 2 {
-		if strings.Contains(serverInfo[1], "|") {
-			remarks = strings.SplitN(serverInfo[1], "|", 2)[1]
-		} else {
-			remarks, err = url.QueryUnescape(serverInfo[1])
-			if err != nil {
-				return model.Outbound{}, &ParseError{
-					Type:    ErrCannotParseParams,
-					Raw:     proxy,
-					Message: err.Error(),
-				}
-			}
-		}
-	} else {
-		remarks, err = url.QueryUnescape(server)
-		if err != nil {
-			return model.Outbound{}, err
-		}
-	}
-
-	uuid := strings.TrimSpace(urlParts[0])
-	flow, security, alpnStr, sni, insecure, fp, pbk, sid, path, host, serviceName, _type := params.Get("flow"), params.Get("security"), params.Get("alpn"), params.Get("sni"), params.Get("allowInsecure"), params.Get("fp"), params.Get("pbk"), params.Get("sid"), params.Get("path"), params.Get("host"), params.Get("serviceName"), params.Get("type")
+	query := link.Query()
+	uuid := link.User.Username()
+	flow, security, alpnStr, sni, insecure, fp, pbk, sid, path, host, serviceName, _type := query.Get("flow"), query.Get("security"), query.Get("alpn"), query.Get("sni"), query.Get("allowInsecure"), query.Get("fp"), query.Get("pbk"), query.Get("sid"), query.Get("path"), query.Get("host"), query.Get("serviceName"), query.Get("type")
 
 	enableUTLS := fp != ""
 	insecureBool := insecure == "1"
@@ -90,6 +52,11 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	} else {
 		alpn = nil
 	}
+	remarks := link.Fragment
+	if remarks == "" {
+		remarks = fmt.Sprintf("%s:%s", server, portStr)
+	}
+	remarks = strings.TrimSpace(remarks)
 
 	result := model.Outbound{
 		Type: "vless",

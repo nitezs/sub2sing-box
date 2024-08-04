@@ -1,8 +1,8 @@
 package parser
 
 import (
+	"fmt"
 	"net/url"
-	"strconv"
 	"strings"
 	"sub2sing-box/constant"
 	"sub2sing-box/model"
@@ -10,6 +10,10 @@ import (
 )
 
 func ParseShadowsocks(proxy string) (model.Outbound, error) {
+	if !strings.HasPrefix(proxy, constant.ShadowsocksPrefix) {
+		return model.Outbound{}, &ParseError{Type: ErrInvalidPrefix, Raw: proxy}
+	}
+
 	link, err := url.Parse(proxy)
 	if err != nil {
 		return model.Outbound{}, &ParseError{
@@ -28,20 +32,31 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	if link.Scheme+"://" != constant.ShadowsocksPrefix {
-		return model.Outbound{}, &ParseError{Type: ErrInvalidPrefix, Raw: proxy}
-	}
-
-	port, err := strconv.Atoi(link.Port())
-	if err != nil {
+	portStr := link.Port()
+	if portStr == "" {
 		return model.Outbound{}, &ParseError{
 			Type:    ErrInvalidStruct,
 			Message: "missing server port",
 			Raw:     proxy,
 		}
 	}
+	port, err := ParsePort(portStr)
+	if err != nil {
+		return model.Outbound{}, &ParseError{
+			Type: ErrInvalidStruct,
+			Raw:  proxy,
+		}
+	}
 
 	user, err := util.DecodeBase64(link.User.Username())
+	if err != nil {
+		return model.Outbound{}, &ParseError{
+			Type:    ErrInvalidStruct,
+			Message: "missing method and password",
+			Raw:     proxy,
+		}
+	}
+
 	if user == "" {
 		return model.Outbound{}, &ParseError{
 			Type:    ErrInvalidStruct,
@@ -70,13 +85,19 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 		}
 	}
 
+	remarks := link.Fragment
+	if remarks == "" {
+		remarks = fmt.Sprintf("%s:%s", server, portStr)
+	}
+	remarks = strings.TrimSpace(remarks)
+
 	result := model.Outbound{
 		Type: "shadowsocks",
-		Tag:  link.Fragment,
+		Tag:  remarks,
 		ShadowsocksOptions: model.ShadowsocksOutboundOptions{
 			ServerOptions: model.ServerOptions{
 				Server:     server,
-				ServerPort: uint16(port),
+				ServerPort: port,
 			},
 			Method:        methodAndPass[0],
 			Password:      methodAndPass[1],
