@@ -72,6 +72,8 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 			Raw:     proxy,
 		}
 	}
+	method := methodAndPass[0]
+	password := methodAndPass[1]
 
 	query := link.Query()
 	pluginStr := query.Get("plugin")
@@ -99,8 +101,8 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 				Server:     server,
 				ServerPort: port,
 			},
-			Method:        methodAndPass[0],
-			Password:      methodAndPass[1],
+			Method:        method,
+			Password:      password,
 			Plugin:        plugin,
 			PluginOptions: options,
 		},

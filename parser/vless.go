@@ -78,10 +78,6 @@ func ParseVless(proxy string) (model.Outbound, error) {
 				ALPN:       alpn,
 				ServerName: sni,
 				Insecure:   insecureBool,
-				UTLS: &model.OutboundUTLSOptions{
-					Enabled:     enableUTLS,
-					Fingerprint: fp,
-				},
 			},
 		}
 	}
@@ -93,10 +89,6 @@ func ParseVless(proxy string) (model.Outbound, error) {
 				ALPN:       alpn,
 				ServerName: sni,
 				Insecure:   insecureBool,
-				UTLS: &model.OutboundUTLSOptions{
-					Enabled:     enableUTLS,
-					Fingerprint: fp,
-				},
 				Reality: &model.OutboundRealityOptions{
 					Enabled:   true,
 					PublicKey: pbk,
@@ -141,7 +133,7 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		hosts, err := url.QueryUnescape(host)
 		if err != nil {
 			return model.Outbound{}, &ParseError{
-				Type:    ErrCannotParseParams,
+				Type:    ErrInvalidStruct,
 				Raw:     proxy,
 				Message: err.Error(),
 			}
@@ -153,5 +145,13 @@ func ParseVless(proxy string) (model.Outbound, error) {
 			},
 		}
 	}
+
+	if enableUTLS {
+		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.UTLS = &model.OutboundUTLSOptions{
+			Enabled:     enableUTLS,
+			Fingerprint: fp,
+		}
+	}
+
 	return result, nil
 }

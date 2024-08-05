@@ -18,7 +18,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 	proxy = strings.TrimPrefix(proxy, constant.VMessPrefix)
 	base64, err := util.DecodeBase64(proxy)
 	if err != nil {
-		return model.Outbound{}, &ParseError{Type: ErrInvalidBase64, Raw: proxy, Message: err.Error()}
+		return model.Outbound{}, &ParseError{Type: ErrInvalidStruct, Raw: proxy, Message: err.Error()}
 	}
 
 	var vmess model.VmessJson

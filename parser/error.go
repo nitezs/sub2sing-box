@@ -9,11 +9,9 @@ type ParseError struct {
 type ParseErrorType string
 
 const (
-	ErrInvalidPrefix     ParseErrorType = "invalid url prefix"
-	ErrInvalidStruct     ParseErrorType = "invalid struct"
-	ErrInvalidPort       ParseErrorType = "invalid port number"
-	ErrCannotParseParams ParseErrorType = "cannot parse query parameters"
-	ErrInvalidBase64     ParseErrorType = "invalid base64"
+	ErrInvalidPrefix ParseErrorType = "invalid url prefix"
+	ErrInvalidStruct ParseErrorType = "invalid struct"
+	ErrInvalidPort   ParseErrorType = "invalid port number"
 )
 
 func (e *ParseError) Error() string {

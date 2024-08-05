@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
 	C "sub2sing-box/constant"
-	"sub2sing-box/util"
 )
 
 type _Outbound struct {
@@ -83,17 +83,41 @@ func (h *Outbound) MarshalJSON() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	result, err := util.MergeAndMarshal(struct {
-		Type string `json:"type"`
-		Tag  string `json:"tag,omitempty"`
-	}{
-		Type: h.Type,
-		Tag:  h.Tag,
-	}, rawOptions)
-	if err != nil {
-		return nil, err
+	result := make(map[string]any)
+	result["type"] = h.Type
+	result["tag"] = h.Tag
+	optsValue := reflect.ValueOf(rawOptions).Elem()
+	optsType := optsValue.Type()
+	for i := 0; i < optsType.NumField(); i++ {
+		field := optsValue.Field(i)
+		fieldType := optsType.Field(i)
+		if fieldType.Anonymous {
+			embeddedFields := reflect.ValueOf(field.Interface())
+			if field.Kind() == reflect.Struct {
+				for j := 0; j < embeddedFields.NumField(); j++ {
+					embeddedField := embeddedFields.Field(j)
+					embeddedFieldType := embeddedFields.Type().Field(j)
+					processField(embeddedField, embeddedFieldType, result)
+				}
+			}
+		} else {
+			processField(field, fieldType, result)
+		}
 	}
-	return []byte(result), nil
+	return json.Marshal(result)
+}
+
+func processField(field reflect.Value, fieldType reflect.StructField, result map[string]any) {
+	jsonTag := fieldType.Tag.Get("json")
+	if jsonTag == "-" {
+		return
+	}
+	tagParts := strings.Split(jsonTag, ",")
+	tagName := tagParts[0]
+	if len(tagParts) > 1 && tagParts[1] == "omitempty" && field.IsZero() {
+		return
+	}
+	result[tagName] = field.Interface()
 }
 
 func (h *Outbound) UnmarshalJSON(bytes []byte) error {
