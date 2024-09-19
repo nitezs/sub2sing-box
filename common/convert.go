@@ -9,10 +9,11 @@ import (
 	"regexp"
 	"sort"
 	"strings"
-	C "sub2sing-box/constant"
-	"sub2sing-box/model"
-	"sub2sing-box/parser"
-	"sub2sing-box/util"
+
+	C "github.com/nitezs/sub2sing-box/constant"
+	"github.com/nitezs/sub2sing-box/model"
+	"github.com/nitezs/sub2sing-box/parser"
+	"github.com/nitezs/sub2sing-box/util"
 )
 
 func Convert(

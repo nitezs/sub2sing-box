@@ -6,7 +6,8 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
-	"sub2sing-box/api/handler"
+
+	"github.com/nitezs/sub2sing-box/api/handler"
 
 	"github.com/gin-gonic/gin"
 )

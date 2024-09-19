@@ -1,7 +1,7 @@
 package model
 
 import (
-	C "sub2sing-box/constant"
+	C "github.com/nitezs/sub2sing-box/constant"
 
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"

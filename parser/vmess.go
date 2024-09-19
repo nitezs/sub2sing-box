@@ -5,9 +5,10 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"sub2sing-box/constant"
-	"sub2sing-box/model"
-	"sub2sing-box/util"
+
+	"github.com/nitezs/sub2sing-box/constant"
+	"github.com/nitezs/sub2sing-box/model"
+	"github.com/nitezs/sub2sing-box/util"
 )
 
 func ParseVmess(proxy string) (model.Outbound, error) {

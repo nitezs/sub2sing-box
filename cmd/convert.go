@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sub2sing-box/common"
-	"sub2sing-box/model"
+
+	"github.com/nitezs/sub2sing-box/common"
+	"github.com/nitezs/sub2sing-box/model"
 
 	"github.com/spf13/cobra"
 )
@@ -79,7 +80,7 @@ func convertRun(cmd *cobra.Command, args []string) {
 func loadConfig() {
 	if config == "" {
 		if wd, err := os.Getwd(); err == nil {
-			config = filepath.Join(wd, "sub2sing-box.json")
+			config = filepath.Join(wd, "github.com/nitezs/sub2sing-box.json")
 			if _, err := os.Stat(config); os.IsNotExist(err) {
 				return
 			}

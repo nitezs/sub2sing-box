@@ -2,9 +2,10 @@ package handler
 
 import (
 	"encoding/json"
-	"sub2sing-box/common"
-	"sub2sing-box/model"
-	"sub2sing-box/util"
+
+	"github.com/nitezs/sub2sing-box/common"
+	"github.com/nitezs/sub2sing-box/model"
+	"github.com/nitezs/sub2sing-box/util"
 
 	"github.com/gin-gonic/gin"
 )

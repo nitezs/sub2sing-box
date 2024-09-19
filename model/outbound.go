@@ -5,7 +5,8 @@ import (
 	"errors"
 	"reflect"
 	"strings"
-	C "sub2sing-box/constant"
+
+	C "github.com/nitezs/sub2sing-box/constant"
 )
 
 type _Outbound struct {
@@ -82,6 +83,9 @@ func (h *Outbound) MarshalJSON() ([]byte, error) {
 	rawOptions, err := h.RawOptions()
 	if err != nil {
 		return nil, err
+	}
+	if rawOptions == nil {
+		return json.Marshal((*_Outbound)(h))
 	}
 	result := make(map[string]any)
 	result["type"] = h.Type

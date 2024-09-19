@@ -1,8 +1,8 @@
 package parser
 
 import (
-	"sub2sing-box/constant"
-	"sub2sing-box/model"
+	"github.com/nitezs/sub2sing-box/constant"
+	"github.com/nitezs/sub2sing-box/model"
 )
 
 var ParserMap map[string]func(string) (model.Outbound, error) = map[string]func(string) (model.Outbound, error){

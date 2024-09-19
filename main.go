@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"sub2sing-box/cmd"
+
+	"github.com/nitezs/sub2sing-box/cmd"
 )
 
 func main() {

@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"sub2sing-box/constant"
+
+	"github.com/nitezs/sub2sing-box/constant"
 
 	"github.com/spf13/cobra"
 )

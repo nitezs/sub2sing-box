@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"sub2sing-box/api"
+	"github.com/nitezs/sub2sing-box/api"
 
 	"github.com/spf13/cobra"
 )
