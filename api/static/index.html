@@ -91,9 +91,6 @@
       <div class="section">
         <h3>策略组</h3>
         <div>
-          <label><mdui-checkbox type="checkbox" id="group" name="group" />启用</label>
-        </div>
-        <div>
           <mdui-text-field label="类型" type="text" id="group-type" name="group-type" value="selector" />
         </div>
         <div>
@@ -239,7 +236,6 @@
         document.getElementsByName("rename_to[]")
       ).map((input) => input.value);
       const output = document.getElementById("output");
-      const group = document.getElementById("group").checked;
       const groupType = document.getElementById("group-type").value;
       const sort = document.getElementById("sort").value;
       const sortType = document.getElementById("sort-type").value;
@@ -256,7 +252,6 @@
         delete: deleteRule,
         template,
         rename,
-        group,
         "group-type": groupType,
         sort,
         "sort-type": sortType,

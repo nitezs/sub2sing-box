@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/nitezs/sub2sing-box/constant"
 	C "github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
 	"github.com/nitezs/sub2sing-box/parser"
@@ -19,10 +20,9 @@ import (
 func Convert(
 	subscriptions []string,
 	proxies []string,
-	template string,
+	templatePath string,
 	delete string,
 	rename map[string]string,
-	group bool,
 	groupType string,
 	sortKey string,
 	sortType string,
@@ -83,11 +83,21 @@ func Convert(
 			}
 		}
 	}
-	if group {
-		outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
-	}
-	if template != "" {
-		result, err = MergeTemplate(outbounds, template)
+
+	if templatePath != "" {
+		templateDate, err := ReadTemplate(templatePath)
+		if err != nil {
+			return "", err
+		}
+		reg := regexp.MustCompile("\"<[A-Za-z]{2}>\"")
+		if reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) {
+			outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
+		}
+		var template model.Config
+		if err = json.Unmarshal([]byte(templateDate), &template); err != nil {
+			return "", err
+		}
+		result, err = MergeTemplate(outbounds, &template)
 		if err != nil {
 			return "", err
 		}
@@ -111,7 +121,7 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 				group.SetOutbounds(append(group.GetOutbounds(), p.Tag))
 				newGroup[country] = group
 			} else {
-				if groupType == C.TypeSelector {
+				if groupType == C.TypeSelector || groupType == "" {
 					newGroup[country] = model.Outbound{
 						Tag:  country,
 						Type: groupType,
@@ -159,22 +169,16 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 	return append(proxies, groups...)
 }
 
-func MergeTemplate(outbounds []model.Outbound, template string) (string, error) {
-	var config model.Config
+func ReadTemplate(template string) (string, error) {
+	var data string
 	var err error
-	isNetworkFile, err := regexp.MatchString(`^https?://`, template)
-	if err != nil {
-		return "", err
-	}
+	isNetworkFile, _ := regexp.MatchString(`^https?://`, template)
 	if isNetworkFile {
-		data, err := util.Fetch(template, 3)
+		data, err = util.Fetch(template, 3)
 		if err != nil {
 			return "", err
 		}
-		err = json.Unmarshal([]byte(data), &config)
-		if err != nil {
-			return "", err
-		}
+		return data, nil
 	} else {
 		if !strings.Contains(template, string(filepath.Separator)) {
 			path := filepath.Join("templates", template)
@@ -182,11 +186,16 @@ func MergeTemplate(outbounds []model.Outbound, template string) (string, error) 
 				template = path
 			}
 		}
-		config, err = ReadTemplate(template)
+		dataBytes, err := os.ReadFile(template)
 		if err != nil {
 			return "", err
 		}
+		return string(dataBytes), nil
 	}
+}
+
+func MergeTemplate(outbounds []model.Outbound, template *model.Config) (string, error) {
+	var err error
 	proxyTags := make([]string, 0)
 	groupTags := make([]string, 0)
 	groups := make(map[string]model.Outbound)
@@ -201,13 +210,13 @@ func MergeTemplate(outbounds []model.Outbound, template string) (string, error) 
 		}
 	}
 	reg := regexp.MustCompile("<[A-Za-z]{2}>")
-	for i, outbound := range config.Outbounds {
+	for i, outbound := range template.Outbounds {
 		if outbound.Type == C.TypeSelector || outbound.Type == C.TypeURLTest {
 			var parsedOutbound []string = make([]string, 0)
 			for _, o := range outbound.GetOutbounds() {
-				if o == "<all-proxy-tags>" {
+				if o == constant.AllProxyTags {
 					parsedOutbound = append(parsedOutbound, proxyTags...)
-				} else if o == "<all-country-tags>" {
+				} else if o == constant.AllCountryTags {
 					parsedOutbound = append(parsedOutbound, groupTags...)
 				} else if reg.MatchString(o) {
 					country := strings.ToUpper(strings.Trim(reg.FindString(o), "<>"))
@@ -218,11 +227,11 @@ func MergeTemplate(outbounds []model.Outbound, template string) (string, error) 
 					parsedOutbound = append(parsedOutbound, o)
 				}
 			}
-			config.Outbounds[i].SetOutbounds(parsedOutbound)
+			template.Outbounds[i].SetOutbounds(parsedOutbound)
 		}
 	}
-	config.Outbounds = append(config.Outbounds, outbounds...)
-	data, err := json.Marshal(config)
+	template.Outbounds = append(template.Outbounds, outbounds...)
+	data, err := json.Marshal(template)
 	if err != nil {
 		return "", err
 	}
@@ -294,19 +303,6 @@ func ConvertSubscriptionsToJson(urls []string) (string, error) {
 		return "", err
 	}
 	return string(result), nil
-}
-
-func ReadTemplate(path string) (model.Config, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return model.Config{}, err
-	}
-	var res model.Config
-	err = json.Unmarshal(data, &res)
-	if err != nil {
-		return model.Config{}, err
-	}
-	return res, nil
 }
 
 func DeleteProxy(proxies []model.Outbound, regex string) ([]model.Outbound, error) {

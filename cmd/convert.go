@@ -56,7 +56,6 @@ func convertRun(cmd *cobra.Command, args []string) {
 		template,
 		delete,
 		rename,
-		group,
 		groupType,
 		sortKey,
 		sortType,
@@ -120,9 +119,6 @@ func mergeConfig(cfg model.ConvertRequest) {
 	}
 	if len(rename) == 0 {
 		rename = cfg.Rename
-	}
-	if !group {
-		group = cfg.Group
 	}
 	if groupType == "" {
 		groupType = cfg.GroupType
