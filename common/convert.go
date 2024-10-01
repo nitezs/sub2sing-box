@@ -90,7 +90,13 @@ func Convert(
 			return "", err
 		}
 		reg := regexp.MustCompile("\"<[A-Za-z]{2}>\"")
-		if reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) {
+		group := false
+		for _, v := range model.CountryEnglishName {
+			if strings.Contains(templateDate, v) {
+				group = true
+			}
+		}
+		if reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) || group {
 			outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
 		}
 		var template model.Config

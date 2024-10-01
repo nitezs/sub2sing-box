@@ -21,12 +21,14 @@ data 为 base64 URL 编码(将编码字符串中`/`替换为`_`，`+`替换为`-
   "template": "模板路径/网络地址",
   "delete": "",
   "rename": {"原文本": "新文本"},
-  "group": false,
   "group-type": "selector",
   "sort": "name",
   "sort-type": "asc"
 }
 ```
+
+该 JSON 同时可用于 `convert` 的 `--config` 参数，以便本地生成 sing-box 配置。
+例如将上方 JSON 内容存放于 `config.json` 后执行 `sub2sing-box convert -c ./config.json` 即可生成 sing-box 配置，免去每次生成时重复设置参数
 
 ## Template 占位符
 
