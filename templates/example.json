@@ -141,8 +141,8 @@
         "outbound": "block"
       },
       {
-        "rule_set": ["geosite-category-games@cn"],
-        "outbound": "direct"
+        "rule_set": ["geosite-google"],
+        "outbound": "default"
       },
       {
         "rule_set": [
@@ -150,8 +150,6 @@
           "geosite-geolocation-cn",
           "geosite-cn",
           "geosite-category-games@cn",
-          "geosite-google@cn",
-          "geosite-google-play@cn",
           "geosite-steam@cn"
         ],
         "outbound": "direct"
@@ -212,6 +210,13 @@
         "tag": "geosite-cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "default"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-google",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google.srs",
         "download_detour": "default"
       }
     ],
