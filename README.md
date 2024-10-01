@@ -2,10 +2,6 @@
 
 ## 控制台命令
 
-- convert: 转换
-- server: 启动 Web UI
-- version: 版本信息
-
 `sub2sing-box <command> -h` 查看帮助
 
 ## Api
@@ -63,3 +59,7 @@ data 为 base64 URL 编码(将编码字符串中`/`替换为`_`，`+`替换为`-
 ## Docker
 
 `docker run -p 8080:8080 nite07/sub2sing-box`
+
+## 模板
+
+默认模板(`./templates/example.json`) 是 `tun+fakeip` 配置，大家可以根据需求自行修改

@@ -71,6 +71,7 @@
       "inet6_address": "fdfe:dcba:9876::1/126",
       "auto_route": true,
       "strict_route": true,
+      "sniff": true,
       "inet4_route_exclude_address": ["100.64.0.0/10"],
       "inet6_route_exclude_address": ["fd7a:115c:a1e0::/48"]
     }
@@ -145,6 +146,7 @@
       },
       {
         "rule_set": [
+          "geoip-cn",
           "geosite-geolocation-cn",
           "geosite-cn",
           "geosite-category-games@cn",
@@ -218,7 +220,7 @@
   },
   "experimental": {
     "cache_file": {
-      "enabled": false
+      "enabled": true
     },
     "clash_api": {
       "default_mode": "Enhanced",
