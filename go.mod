@@ -1,6 +1,6 @@
 module github.com/nitezs/sub2sing-box
 
-go 1.21.5
+go 1.23
 
 require (
 	github.com/sagernet/sing-box v1.10.0-beta.11

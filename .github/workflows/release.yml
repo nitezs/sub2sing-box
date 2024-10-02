@@ -18,6 +18,11 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
 
+      - name: Install UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          install-only: true
+
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v5
         with:

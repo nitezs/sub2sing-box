@@ -1,3 +1,4 @@
+version: 2
 project_name: sub2sing-box
 builds:
   - env:
@@ -27,3 +28,6 @@ archives:
       - templates
 release:
   draft: true
+upx:
+  - enabled: true
+    compress: best
