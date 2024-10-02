@@ -9,6 +9,7 @@ import (
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
 	"github.com/nitezs/sub2sing-box/util"
+	"github.com/sagernet/sing-box/option"
 )
 
 func ParseVmess(proxy string) (model.Outbound, error) {
@@ -64,16 +65,18 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 	}
 
 	result := model.Outbound{
-		Type: "vmess",
-		Tag:  name,
-		VMessOptions: model.VMessOutboundOptions{
-			ServerOptions: model.ServerOptions{
-				Server:     vmess.Add,
-				ServerPort: port,
+		Outbound: option.Outbound{
+			Type: "vmess",
+			Tag:  name,
+			VMessOptions: option.VMessOutboundOptions{
+				ServerOptions: option.ServerOptions{
+					Server:     vmess.Add,
+					ServerPort: port,
+				},
+				UUID:     vmess.Id,
+				AlterId:  aid,
+				Security: vmess.Scy,
 			},
-			UUID:     vmess.Id,
-			AlterId:  aid,
-			Security: vmess.Scy,
 		},
 	}
 
@@ -84,10 +87,10 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		} else {
 			alpn = nil
 		}
-		result.VMessOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
+		result.VMessOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
 				Enabled: true,
-				UTLS: &model.OutboundUTLSOptions{
+				UTLS: &option.OutboundUTLSOptions{
 					Fingerprint: vmess.Fp,
 				},
 				ALPN:       alpn,
@@ -95,7 +98,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 			},
 		}
 		if vmess.Fp != "" {
-			result.VMessOptions.OutboundTLSOptionsContainer.TLS.UTLS = &model.OutboundUTLSOptions{
+			result.VMessOptions.OutboundTLSOptionsContainer.TLS.UTLS = &option.OutboundUTLSOptions{
 				Enabled:     true,
 				Fingerprint: vmess.Fp,
 			}
@@ -109,42 +112,42 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		if vmess.Host == "" {
 			vmess.Host = vmess.Add
 		}
-		result.VMessOptions.Transport = &model.V2RayTransportOptions{
+		result.VMessOptions.Transport = &option.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model.V2RayWebsocketOptions{
+			WebsocketOptions: option.V2RayWebsocketOptions{
 				Path: vmess.Path,
-				Headers: map[string]string{
-					"Host": vmess.Host,
+				Headers: map[string]option.Listable[string]{
+					"Host": {vmess.Host},
 				},
 			},
 		}
 	}
 
 	if vmess.Net == "quic" {
-		quic := model.V2RayQUICOptions{}
-		result.VMessOptions.Transport = &model.V2RayTransportOptions{
+		quic := option.V2RayQUICOptions{}
+		result.VMessOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: quic,
 		}
 	}
 
 	if vmess.Net == "grpc" {
-		grpc := model.V2RayGRPCOptions{
+		grpc := option.V2RayGRPCOptions{
 			ServiceName:         vmess.Path,
 			PermitWithoutStream: true,
 		}
-		result.VMessOptions.Transport = &model.V2RayTransportOptions{
+		result.VMessOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "grpc",
 			GRPCOptions: grpc,
 		}
 	}
 
 	if vmess.Net == "h2" {
-		httpOps := model.V2RayHTTPOptions{
+		httpOps := option.V2RayHTTPOptions{
 			Host: strings.Split(vmess.Host, ","),
 			Path: vmess.Path,
 		}
-		result.VMessOptions.Transport = &model.V2RayTransportOptions{
+		result.VMessOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "http",
 			HTTPOptions: httpOps,
 		}

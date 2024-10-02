@@ -7,6 +7,7 @@ import (
 
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
+	"github.com/sagernet/sing-box/option"
 )
 
 func ParseVless(proxy string) (model.Outbound, error) {
@@ -59,22 +60,22 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	}
 	remarks = strings.TrimSpace(remarks)
 
-	result := model.Outbound{
+	result := model.Outbound{Outbound: option.Outbound{
 		Type: "vless",
 		Tag:  remarks,
-		VLESSOptions: model.VLESSOutboundOptions{
-			ServerOptions: model.ServerOptions{
+		VLESSOptions: option.VLESSOutboundOptions{
+			ServerOptions: option.ServerOptions{
 				Server:     server,
 				ServerPort: port,
 			},
 			UUID: uuid,
 			Flow: flow,
 		},
-	}
+	}}
 
 	if security == "tls" {
-		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
+		result.VLESSOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
 				Enabled:    true,
 				ALPN:       alpn,
 				ServerName: sni,
@@ -84,13 +85,13 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	}
 
 	if security == "reality" {
-		result.VLESSOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
+		result.VLESSOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
 				Enabled:    true,
 				ALPN:       alpn,
 				ServerName: sni,
 				Insecure:   insecureBool,
-				Reality: &model.OutboundRealityOptions{
+				Reality: &option.OutboundRealityOptions{
 					Enabled:   true,
 					PublicKey: pbk,
 					ShortID:   sid,
@@ -100,31 +101,31 @@ func ParseVless(proxy string) (model.Outbound, error) {
 	}
 
 	if _type == "ws" {
-		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &option.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model.V2RayWebsocketOptions{
+			WebsocketOptions: option.V2RayWebsocketOptions{
 				Path: path,
 			},
 		}
 		if host != "" {
 			if result.VLESSOptions.Transport.WebsocketOptions.Headers == nil {
-				result.VLESSOptions.Transport.WebsocketOptions.Headers = make(map[string]string)
+				result.VLESSOptions.Transport.WebsocketOptions.Headers = make(map[string]option.Listable[string])
 			}
-			result.VLESSOptions.Transport.WebsocketOptions.Headers["Host"] = host
+			result.VLESSOptions.Transport.WebsocketOptions.Headers["Host"] = option.Listable[string]{host}
 		}
 	}
 
 	if _type == "quic" {
-		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "quic",
-			QUICOptions: model.V2RayQUICOptions{},
+			QUICOptions: option.V2RayQUICOptions{},
 		}
 	}
 
 	if _type == "grpc" {
-		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &option.V2RayTransportOptions{
 			Type: "grpc",
-			GRPCOptions: model.V2RayGRPCOptions{
+			GRPCOptions: option.V2RayGRPCOptions{
 				ServiceName: serviceName,
 			},
 		}
@@ -139,16 +140,16 @@ func ParseVless(proxy string) (model.Outbound, error) {
 				Message: err.Error(),
 			}
 		}
-		result.VLESSOptions.Transport = &model.V2RayTransportOptions{
+		result.VLESSOptions.Transport = &option.V2RayTransportOptions{
 			Type: "http",
-			HTTPOptions: model.V2RayHTTPOptions{
+			HTTPOptions: option.V2RayHTTPOptions{
 				Host: strings.Split(hosts, ","),
 			},
 		}
 	}
 
 	if enableUTLS {
-		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.UTLS = &model.OutboundUTLSOptions{
+		result.VLESSOptions.OutboundTLSOptionsContainer.TLS.UTLS = &option.OutboundUTLSOptions{
 			Enabled:     enableUTLS,
 			Fingerprint: fp,
 		}

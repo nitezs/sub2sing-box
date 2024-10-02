@@ -8,6 +8,7 @@ import (
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
 	"github.com/nitezs/sub2sing-box/util"
+	"github.com/sagernet/sing-box/option"
 )
 
 func ParseShadowsocks(proxy string) (model.Outbound, error) {
@@ -95,17 +96,19 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 	remarks = strings.TrimSpace(remarks)
 
 	result := model.Outbound{
-		Type: "shadowsocks",
-		Tag:  remarks,
-		ShadowsocksOptions: model.ShadowsocksOutboundOptions{
-			ServerOptions: model.ServerOptions{
-				Server:     server,
-				ServerPort: port,
+		Outbound: option.Outbound{
+			Type: "shadowsocks",
+			Tag:  remarks,
+			ShadowsocksOptions: option.ShadowsocksOutboundOptions{
+				ServerOptions: option.ServerOptions{
+					Server:     server,
+					ServerPort: port,
+				},
+				Method:        method,
+				Password:      password,
+				Plugin:        plugin,
+				PluginOptions: options,
 			},
-			Method:        method,
-			Password:      password,
-			Plugin:        plugin,
-			PluginOptions: options,
 		},
 	}
 	return result, nil

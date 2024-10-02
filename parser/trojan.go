@@ -7,6 +7,7 @@ import (
 
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
+	"github.com/sagernet/sing-box/option"
 )
 
 func ParseTrojan(proxy string) (model.Outbound, error) {
@@ -68,22 +69,22 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 
 	enableUTLS := fp != ""
 
-	result := model.Outbound{
+	result := model.Outbound{Outbound: option.Outbound{
 		Type: "trojan",
 		Tag:  remarks,
-		TrojanOptions: model.TrojanOutboundOptions{
-			ServerOptions: model.ServerOptions{
+		TrojanOptions: option.TrojanOutboundOptions{
+			ServerOptions: option.ServerOptions{
 				Server:     server,
 				ServerPort: port,
 			},
 			Password: password,
-			Network:  network,
+			Network:  option.NetworkList(network),
 		},
-	}
+	}}
 
 	if security == "xtls" || security == "tls" || sni != "" {
-		result.TrojanOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
+		result.TrojanOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
 				Enabled:    true,
 				ALPN:       alpn,
 				ServerName: sni,
@@ -93,16 +94,16 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 	}
 
 	if security == "reality" {
-		result.TrojanOptions.OutboundTLSOptionsContainer = model.OutboundTLSOptionsContainer{
-			TLS: &model.OutboundTLSOptions{
+		result.TrojanOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
 				Enabled:    true,
 				ServerName: sni,
-				Reality: &model.OutboundRealityOptions{
+				Reality: &option.OutboundRealityOptions{
 					Enabled:   true,
 					PublicKey: pbk,
 					ShortID:   sid,
 				},
-				UTLS: &model.OutboundUTLSOptions{
+				UTLS: &option.OutboundUTLSOptions{
 					Enabled:     enableUTLS,
 					Fingerprint: fp,
 				},
@@ -112,21 +113,21 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 	}
 
 	if network == "ws" {
-		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &option.V2RayTransportOptions{
 			Type: "ws",
-			WebsocketOptions: model.V2RayWebsocketOptions{
+			WebsocketOptions: option.V2RayWebsocketOptions{
 				Path: path,
-				Headers: map[string]string{
-					"Host": host,
+				Headers: map[string]option.Listable[string]{
+					"Host": {host},
 				},
 			},
 		}
 	}
 
 	if network == "http" {
-		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &option.V2RayTransportOptions{
 			Type: "http",
-			HTTPOptions: model.V2RayHTTPOptions{
+			HTTPOptions: option.V2RayHTTPOptions{
 				Host: []string{host},
 				Path: path,
 			},
@@ -134,16 +135,16 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 	}
 
 	if network == "quic" {
-		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "quic",
-			QUICOptions: model.V2RayQUICOptions{},
+			QUICOptions: option.V2RayQUICOptions{},
 		}
 	}
 
 	if network == "grpc" {
-		result.TrojanOptions.Transport = &model.V2RayTransportOptions{
+		result.TrojanOptions.Transport = &option.V2RayTransportOptions{
 			Type: "grpc",
-			GRPCOptions: model.V2RayGRPCOptions{
+			GRPCOptions: option.V2RayGRPCOptions{
 				ServiceName: serviceName,
 			},
 		}

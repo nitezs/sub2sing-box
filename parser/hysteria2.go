@@ -7,6 +7,7 @@ import (
 
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
+	"github.com/sagernet/sing-box/option"
 )
 
 func ParseHysteria2(proxy string) (model.Outbound, error) {
@@ -64,29 +65,31 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 	remarks = strings.TrimSpace(remarks)
 
 	result := model.Outbound{
-		Type: "hysteria2",
-		Tag:  strings.TrimSpace(remarks),
-		Hysteria2Options: model.Hysteria2OutboundOptions{
-			ServerOptions: model.ServerOptions{
-				Server:     server,
-				ServerPort: port,
-			},
-			Password: password,
-			OutboundTLSOptionsContainer: model.OutboundTLSOptionsContainer{
-				TLS: &model.OutboundTLSOptions{
-					Enabled:    enableTLS,
-					Insecure:   insecureBool,
-					ServerName: sni,
+		Outbound: option.Outbound{
+			Type: "hysteria2",
+			Tag:  strings.TrimSpace(remarks),
+			Hysteria2Options: option.Hysteria2OutboundOptions{
+				ServerOptions: option.ServerOptions{
+					Server:     server,
+					ServerPort: port,
 				},
+				Password: password,
+				OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
+					TLS: &option.OutboundTLSOptions{
+						Enabled:    enableTLS,
+						Insecure:   insecureBool,
+						ServerName: sni,
+					},
+				},
+				Network: option.NetworkList(network),
 			},
-			Network: network,
 		},
 	}
 	if pinSHA256 != "" {
 		result.Hysteria2Options.OutboundTLSOptionsContainer.TLS.Certificate = []string{pinSHA256}
 	}
 	if obfs != "" {
-		result.Hysteria2Options.Obfs = &model.Hysteria2Obfs{
+		result.Hysteria2Options.Obfs = &option.Hysteria2Obfs{
 			Type:     obfs,
 			Password: obfsPassword,
 		}

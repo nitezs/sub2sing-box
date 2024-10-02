@@ -78,7 +78,6 @@
   ],
   "outbounds": [
     {
-      "interrupt_exist_connections": true,
       "outbounds": ["<all-proxy-tags>", "direct"],
       "tag": "default",
       "type": "selector"

@@ -8,6 +8,7 @@ import (
 
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
+	"github.com/sagernet/sing-box/option"
 )
 
 func ParseHysteria(proxy string) (model.Outbound, error) {
@@ -70,11 +71,11 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 	}
 	remarks = strings.TrimSpace(remarks)
 
-	return model.Outbound{
+	return model.Outbound{Outbound: option.Outbound{
 		Type: "hysteria",
 		Tag:  remarks,
-		HysteriaOptions: model.HysteriaOutboundOptions{
-			ServerOptions: model.ServerOptions{
+		HysteriaOptions: option.HysteriaOutboundOptions{
+			ServerOptions: option.ServerOptions{
 				Server:     server,
 				ServerPort: port,
 			},
@@ -82,14 +83,14 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 			Down:    downmbps,
 			Auth:    []byte(auth),
 			Obfs:    obfs,
-			Network: protocol,
-			OutboundTLSOptionsContainer: model.OutboundTLSOptionsContainer{
-				TLS: &model.OutboundTLSOptions{
+			Network: option.NetworkList(protocol),
+			OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
+				TLS: &option.OutboundTLSOptions{
 					Enabled:  true,
 					Insecure: insecureBool,
 					ALPN:     alpn,
 				},
 			},
 		},
-	}, nil
+	}}, nil
 }

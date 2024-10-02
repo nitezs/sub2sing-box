@@ -15,6 +15,7 @@ import (
 	"github.com/nitezs/sub2sing-box/model"
 	"github.com/nitezs/sub2sing-box/parser"
 	"github.com/nitezs/sub2sing-box/util"
+	"github.com/sagernet/sing-box/option"
 )
 
 func Convert(
@@ -99,7 +100,7 @@ func Convert(
 		if reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) || group {
 			outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
 		}
-		var template model.Config
+		var template model.Options
 		if err = json.Unmarshal([]byte(templateDate), &template); err != nil {
 			return "", err
 		}
@@ -129,20 +130,24 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 			} else {
 				if groupType == C.TypeSelector || groupType == "" {
 					newGroup[country] = model.Outbound{
-						Tag:  country,
-						Type: groupType,
-						SelectorOptions: model.SelectorOutboundOptions{
-							Outbounds:                 []string{p.Tag},
-							InterruptExistConnections: true,
+						Outbound: option.Outbound{
+							Tag:  country,
+							Type: groupType,
+							SelectorOptions: option.SelectorOutboundOptions{
+								Outbounds:                 []string{p.Tag},
+								InterruptExistConnections: true,
+							},
 						},
 					}
 				} else if groupType == C.TypeURLTest {
 					newGroup[country] = model.Outbound{
-						Tag:  country,
-						Type: groupType,
-						URLTestOptions: model.URLTestOutboundOptions{
-							Outbounds:                 []string{p.Tag},
-							InterruptExistConnections: true,
+						Outbound: option.Outbound{
+							Tag:  country,
+							Type: groupType,
+							URLTestOptions: option.URLTestOutboundOptions{
+								Outbounds:                 []string{p.Tag},
+								InterruptExistConnections: true,
+							},
 						},
 					}
 				}
@@ -200,7 +205,7 @@ func ReadTemplate(template string) (string, error) {
 	}
 }
 
-func MergeTemplate(outbounds []model.Outbound, template *model.Config) (string, error) {
+func MergeTemplate(outbounds []model.Outbound, template *model.Options) (string, error) {
 	var err error
 	proxyTags := make([]string, 0)
 	groupTags := make([]string, 0)
