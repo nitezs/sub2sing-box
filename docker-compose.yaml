@@ -1,4 +1,3 @@
-version: "3.8"
 services:
   sub2sing-box:
     image: nite07/sub2sing-box:latest
@@ -7,3 +6,4 @@ services:
       - ./templates:/app/templates
     ports:
       - 8080:8080
+    restart: unless-stopped
