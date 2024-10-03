@@ -144,12 +144,19 @@
         "outbound": "default"
       },
       {
-        "rule_set": [
-          "geoip-cn",
-          "geosite-geolocation-cn",
-          "geosite-cn",
-          "geosite-category-games@cn",
-          "geosite-steam@cn"
+        "type": "logical",
+        "mode": "or",
+        "rules": [
+          {
+            "rule_set": [
+              "geoip-cn",
+              "geosite-geolocation-cn",
+              "geosite-cn",
+              "geosite-category-games@cn",
+              "geosite-steam@cn"
+            ]
+          },
+          { "process_path_regex": [".*steamapps\\\\common.*"] }
         ],
         "outbound": "direct"
       }
