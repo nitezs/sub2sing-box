@@ -1,4 +1,3 @@
-version: 2
 project_name: sub2sing-box
 builds:
   - env:
