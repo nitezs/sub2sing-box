@@ -45,6 +45,7 @@ func Convert(c *gin.Context) {
 		data.Template,
 		data.Delete,
 		data.Rename,
+		data.Group,
 		data.GroupType,
 		data.SortKey,
 		data.SortType,

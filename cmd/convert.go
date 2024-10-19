@@ -19,6 +19,7 @@ var (
 	output        string
 	delete        string
 	rename        map[string]string
+	group         bool
 	groupType     string
 	sortKey       string
 	sortType      string
@@ -32,6 +33,7 @@ func init() {
 	convertCmd.Flags().StringVarP(&output, "output", "o", "", "output file path")
 	convertCmd.Flags().StringVarP(&delete, "delete", "d", "", "delete proxy with regex")
 	convertCmd.Flags().StringToStringVarP(&rename, "rename", "r", nil, "rename proxy with regex")
+	convertCmd.Flags().BoolVarP(&group, "group", "g", false, "grouping nodes by country")
 	convertCmd.Flags().StringVarP(&groupType, "group-type", "G", "selector", "group type, selector or urltest")
 	convertCmd.Flags().StringVarP(&sortKey, "sort", "S", "tag", "sort key, tag or num")
 	convertCmd.Flags().StringVarP(&sortType, "sort-type", "T", "asc", "sort type, asc or desc")
@@ -54,6 +56,7 @@ func convertRun(cmd *cobra.Command, args []string) {
 		template,
 		delete,
 		rename,
+		group,
 		groupType,
 		sortKey,
 		sortType,

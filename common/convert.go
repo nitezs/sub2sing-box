@@ -24,6 +24,7 @@ func Convert(
 	templatePath string,
 	delete string,
 	rename map[string]string,
+	enableGroup bool,
 	groupType string,
 	sortKey string,
 	sortType string,
@@ -84,7 +85,9 @@ func Convert(
 			}
 		}
 	}
-
+	if enableGroup {
+		outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
+	}
 	if templatePath != "" {
 		templateDate, err := ReadTemplate(templatePath)
 		if err != nil {
@@ -97,7 +100,7 @@ func Convert(
 				group = true
 			}
 		}
-		if reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) || group {
+		if !enableGroup && (reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) || group) {
 			outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
 		}
 		var template model.Options
