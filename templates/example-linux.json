@@ -1,17 +1,30 @@
 {
   "log": {
-    "level": "info",
+    "level": "trace",
     "timestamp": true
   },
   "dns": {
-    "independent_cache": true,
-    "fakeip": {
-      "enabled": true,
-      "inet4_range": "198.18.0.0/15",
-      "inet6_range": "fc00::/18"
-    },
-    "strategy": "prefer_ipv4",
+    "servers": [
+      {
+        "tag": "google",
+        "address": "tls://8.8.8.8",
+        "detour": "default"
+      },
+      {
+        "tag": "local",
+        "address": "https://223.5.5.5/dns-query",
+        "detour": "direct"
+      },
+      {
+        "tag": "refused",
+        "address": "rcode://refused"
+      }
+    ],
     "rules": [
+      {
+        "rule_set": "geosite-category-ads-all",
+        "server": "refused"
+      },
       {
         "outbound": "any",
         "server": "local"
@@ -42,56 +55,45 @@
         ],
         "server": "google",
         "client_subnet": "114.114.114.114/24"
-      },
-      {
-        "query_type": ["A", "AAAA"],
-        "server": "fakeip"
       }
     ],
-    "servers": [
-      {
-        "address": "tls://8.8.8.8",
-        "tag": "google"
-      },
-      {
-        "address": "https://223.5.5.5/dns-query",
-        "detour": "direct",
-        "tag": "local"
-      },
-      {
-        "tag": "fakeip",
-        "address": "fakeip"
-      }
-    ]
+    "final": "local"
   },
   "inbounds": [
     {
       "type": "tun",
+      "address": [
+        "172.16.0.1/30",
+        "fdfe:dcba:9876::1/126"
+      ],
       "auto_route": true,
       "auto_redirect": true,
       "strict_route": true,
+      "exclude_interface": "tailscale0",
       "sniff": true,
-      "sniff_override_destination": true,
-      "address": ["172.16.0.1/30", "fdfe:dcba:9876::1/126"]
+      "sniff_override_destination": true
     }
   ],
   "outbounds": [
     {
-      "outbounds": ["<all-proxy-tags>", "direct"],
+      "type": "selector",
       "tag": "default",
-      "type": "selector"
+      "outbounds": [
+        "\u003call-proxy-tags\u003e",
+        "direct"
+      ]
     },
     {
-      "tag": "direct",
-      "type": "direct"
+      "type": "direct",
+      "tag": "direct"
     },
     {
-      "tag": "block",
-      "type": "block"
+      "type": "block",
+      "tag": "block"
     },
     {
-      "tag": "dns",
-      "type": "dns"
+      "type": "dns",
+      "tag": "dns"
     }
   ],
   "route": {
@@ -122,24 +124,7 @@
         "outbound": "default"
       },
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "port": 853
-          },
-          {
-            "network": "udp",
-            "port": 443
-          },
-          {
-            "protocol": "stun"
-          }
-        ],
-        "outbound": "block"
-      },
-      {
-        "rule_set": ["geosite-google"],
+        "rule_set": "geosite-google",
         "outbound": "default"
       },
       {
@@ -160,6 +145,13 @@
       }
     ],
     "rule_set": [
+      {
+        "type": "remote",
+        "tag": "geosite-category-ads-all",
+        "format": "binary",
+        "url": "https://ghp.ci/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
+        "download_detour": "default"
+      },
       {
         "type": "remote",
         "tag": "geosite-geolocation-cn",
@@ -186,20 +178,6 @@
         "tag": "geosite-category-games@cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-games@cn.srs",
-        "download_detour": "default"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-google@cn",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google@cn.srs",
-        "download_detour": "default"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-google-play@cn",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-google-play@cn.srs",
         "download_detour": "default"
       },
       {
@@ -232,10 +210,10 @@
       "enabled": true
     },
     "clash_api": {
-      "default_mode": "Enhanced",
       "external_controller": "127.0.0.1:9090",
       "external_ui": "./ui",
-      "external_ui_download_detour": "default"
+      "external_ui_download_detour": "default",
+      "default_mode": "Enhanced"
     }
   }
 }
