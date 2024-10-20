@@ -3,8 +3,10 @@
     "servers": [
       {
         "tag": "google",
-        "address": "tls://8.8.8.8",
-        "detour": "default"
+        "address": "https://dns.google/dns-query",
+        "address_resolver": "local",
+        "address_strategy": "prefer_ipv4",
+        "client_subnet": "114.114.114.114/24"
       },
       {
         "tag": "local",
@@ -53,7 +55,7 @@
         "client_subnet": "114.114.114.114/24"
       }
     ],
-    "final": "local",
+    "final": "google",
     "disable_cache": false,
     "disable_expire": false
   }

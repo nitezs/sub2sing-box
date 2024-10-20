@@ -7,8 +7,10 @@
     "servers": [
       {
         "tag": "google",
-        "address": "tls://8.8.8.8",
-        "detour": "default"
+        "address": "https://dns.google/dns-query",
+        "address_resolver": "local",
+        "address_strategy": "prefer_ipv4",
+        "client_subnet": "114.114.114.114/24"
       },
       {
         "tag": "local",
@@ -57,7 +59,7 @@
         "client_subnet": "114.114.114.114/24"
       }
     ],
-    "final": "local"
+    "final": "google"
   },
   "inbounds": [
     {
@@ -70,8 +72,7 @@
       "auto_redirect": true,
       "strict_route": true,
       "exclude_interface": "tailscale0",
-      "sniff": true,
-      "sniff_override_destination": true
+      "sniff": true
     }
   ],
   "outbounds": [
