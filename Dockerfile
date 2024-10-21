@@ -5,14 +5,11 @@ WORKDIR /app
 COPY . .
 RUN go mod download
 ARG version
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X sub2sing-box/constant.Version=${version}" -o sub2sing-box .
+RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w -X github.com/nitezs/sub2sing-box/constant.Version=${version}" -o sub2sing-box .
 WORKDIR /app
 
 FROM alpine:latest
 COPY --from=builder /app/sub2sing-box /app/sub2sing-box
-COPY --from=builder /app/templates /app/templates-origin
-COPY --from=builder /app/entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
 VOLUME [ "/app/templates" ]
 EXPOSE 8080
-ENTRYPOINT ["/app/entrypoint.sh"]
+CMD ["/app/sub2sing-box", "server"]
