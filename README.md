@@ -15,18 +15,19 @@
   "subscriptions": ["订阅地址1", "订阅地址2"],
   "proxies": ["代理1", "代理2"],
   "template": "模板路径或网络地址",
-  "delete": "",
+  "delete": "剩余流量",
   "rename": { "原文本": "新文本" },
   "group-type": "selector",
   "sort": "name",
-  "sort-type": "asc"
+  "sort-type": "asc",
+  "output": "./config.json"
 }
 ```
 
-将上述 JSON 内容保存为 `config.json`，然后执行:
+将上述 JSON 内容保存为 `sub2sing-box.json`，执行:
 
 ```
-sub2sing-box convert -c ./config.json
+sub2sing-box convert -c ./sub2sing-box.json
 ```
 
 即可生成 sing-box 配置，无需每次重复设置参数。
@@ -35,7 +36,7 @@ sub2sing-box convert -c ./config.json
 
 ### 默认模板
 
-默认模板位于 `templates` 目录，使用 `tun+fakeip` 配置，可以根据需求自行修改模板内容。
+默认模板位于 `templates` 目录，使用 `tun` 配置，可以根据需求自行修改模板内容。
 
 ### 占位符
 
@@ -45,7 +46,13 @@ sub2sing-box convert -c ./config.json
 - `<all-country-tags>`: 插入所有国家标签
 - `<国家(地区)二字码>`: 插入指定国家(地区)所有节点标签，如 `<tw>`
 
-占位符使用示例:
+#### 占位符使用示例:
+
+假设有节点：
+
+- US
+- SG
+- TW
 
 ```json
 {
@@ -55,6 +62,17 @@ sub2sing-box convert -c ./config.json
   "interrupt_exist_connections": true
 }
 
+// 转换后
+
+{
+  "type": "selector",
+  "tag": "节点选择",
+  "outbounds": ["US", "SG", "TW", "direct"],
+  "interrupt_exist_connections": true
+}
+```
+
+```json
 {
   "type": "selector",
   "tag": "节点选择",
@@ -62,10 +80,32 @@ sub2sing-box convert -c ./config.json
   "interrupt_exist_connections": true
 }
 
+// 转换后
+
+{
+  "type": "selector",
+  "tag": "节点选择",
+  "outbounds": ["美国(US)", "新加坡(SG)", "台湾(TW)", "direct"],
+  "interrupt_exist_connections": true
+}
+
+// 其中 "美国(US)", "新加坡(SG)", "台湾(TW)" 为策略组，分别包含 US, SG, TW 节点
+```
+
+```json
 {
   "type": "selector",
   "tag": "巴哈姆特",
   "outbounds": ["<tw>", "direct"],
+  "interrupt_exist_connections": true
+}
+
+// 转换后
+
+{
+  "type": "selector",
+  "tag": "巴哈姆特",
+  "outbounds": ["台湾(TW)", "direct"],
   "interrupt_exist_connections": true
 }
 ```
@@ -73,7 +113,7 @@ sub2sing-box convert -c ./config.json
 ## Docker 使用
 
 ```
-docker run -p 8080:8080 nite07/sub2sing-box
+docker run -p 8080:8080 nite07/sub2sing-box:latest
 ```
 
 可以挂载目录添加自定义模板
