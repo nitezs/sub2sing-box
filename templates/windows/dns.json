@@ -3,14 +3,12 @@
     "servers": [
       {
         "tag": "google",
-        "address": "https://dns.google/dns-query",
-        "address_resolver": "local",
-        "address_strategy": "prefer_ipv4",
-        "client_subnet": "114.114.114.114/24"
+        "address": "https://8.8.8.8/dns-query",
+        "detour": "default"
       },
       {
         "tag": "local",
-        "address": "https://223.5.5.5/dns-query",
+        "address": "h3://223.5.5.5/dns-query",
         "detour": "direct"
       },
       {

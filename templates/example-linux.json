@@ -1,20 +1,18 @@
 {
   "log": {
-    "level": "trace",
+    "level": "info",
     "timestamp": true
   },
   "dns": {
     "servers": [
       {
         "tag": "google",
-        "address": "https://dns.google/dns-query",
-        "address_resolver": "local",
-        "address_strategy": "prefer_ipv4",
-        "client_subnet": "114.114.114.114/24"
+        "address": "https://8.8.8.8/dns-query",
+        "detour": "default"
       },
       {
         "tag": "local",
-        "address": "https://223.5.5.5/dns-query",
+        "address": "h3://223.5.5.5/dns-query",
         "detour": "direct"
       },
       {
@@ -60,6 +58,12 @@
       }
     ],
     "final": "google"
+  },
+  "ntp": {
+    "enabled": true,
+    "interval": "30m0s",
+    "server": "ntp.aliyun.com",
+    "server_port": 123
   },
   "inbounds": [
     {
@@ -150,7 +154,7 @@
         "type": "remote",
         "tag": "geosite-category-ads-all",
         "format": "binary",
-        "url": "https://ghp.ci/https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-category-ads-all.srs",
         "download_detour": "default"
       },
       {

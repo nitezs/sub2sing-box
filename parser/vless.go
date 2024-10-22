@@ -96,6 +96,10 @@ func ParseVless(proxy string) (model.Outbound, error) {
 					PublicKey: pbk,
 					ShortID:   sid,
 				},
+				UTLS: &option.OutboundUTLSOptions{
+					Enabled:     true,
+					Fingerprint: fp,
+				},
 			},
 		}
 	}
