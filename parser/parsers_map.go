@@ -13,4 +13,5 @@ var ParserMap map[string]func(string) (model.Outbound, error) = map[string]func(
 	constant.HysteriaPrefix:    ParseHysteria,
 	constant.Hysteria2Prefix1:  ParseHysteria2,
 	constant.Hysteria2Prefix2:  ParseHysteria2,
+	constant.SocksPrefix:       ParseSocks,
 }
