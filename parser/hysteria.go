@@ -55,6 +55,7 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 
 	protocol, auth, insecure, upmbps, downmbps, obfs, alpnStr := query.Get("protocol"), query.Get("auth"), query.Get("insecure"), query.Get("upmbps"), query.Get("downmbps"), query.Get("obfs"), query.Get("alpn")
 	insecureBool, err := strconv.ParseBool(insecure)
+	enableTLS := insecureBool || alpnStr != ""
 	if err != nil {
 		insecureBool = false
 	}
@@ -86,7 +87,7 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 			Network: option.NetworkList(protocol),
 			OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
 				TLS: &option.OutboundTLSOptions{
-					Enabled:  true,
+					Enabled:  enableTLS,
 					Insecure: insecureBool,
 					ALPN:     alpn,
 				},

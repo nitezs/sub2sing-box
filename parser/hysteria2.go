@@ -55,9 +55,16 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 			Raw:  portStr,
 		}
 	}
-	network, obfs, obfsPassword, pinSHA256, insecure, sni := query.Get("network"), query.Get("obfs"), query.Get("obfs-password"), query.Get("pinSHA256"), query.Get("insecure"), query.Get("sni")
-	enableTLS := pinSHA256 != "" || sni != ""
+	network, obfs, obfsPassword, pinSHA256, insecure, sni, alpnStr := query.Get("network"), query.Get("obfs"), query.Get("obfs-password"), query.Get("pinSHA256"), query.Get("insecure"), query.Get("sni"), query.Get("alpn")
 	insecureBool := insecure == "1"
+	enableTLS := pinSHA256 != "" || sni != "" || alpnStr != ""
+
+	var alpn []string
+	alpnStr = strings.TrimSpace(alpnStr)
+	if alpnStr != "" {
+		alpn = strings.Split(alpnStr, ",")
+	}
+
 	remarks := link.Fragment
 	if remarks == "" {
 		remarks = fmt.Sprintf("%s:%s", server, portStr)
@@ -79,6 +86,7 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 						Enabled:    enableTLS,
 						Insecure:   insecureBool,
 						ServerName: sni,
+						ALPN:       alpn,
 					},
 				},
 				Network: option.NetworkList(network),
