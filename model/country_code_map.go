@@ -870,6 +870,7 @@ var CountryISO = map[string]string{
 	"FO": "法罗群岛(FO)",
 	"FR": "法国(FR)",
 	"GA": "加蓬(GA)",
+	"GB": "英国(UK)",
 	"UK": "英国(UK)",
 	"GD": "格林纳达(GD)",
 	"GE": "格鲁吉亚(GE)",
