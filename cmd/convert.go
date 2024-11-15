@@ -27,12 +27,12 @@ var (
 )
 
 func init() {
-	convertCmd.Flags().StringSliceVarP(&subscriptions, "subscription", "s", nil, "subscription URLs")
-	convertCmd.Flags().StringSliceVarP(&proxies, "proxy", "p", nil, "proxies share links")
+	convertCmd.Flags().StringSliceVarP(&subscriptions, "subscription", "s", make([]string, 0), "subscription URLs")
+	convertCmd.Flags().StringSliceVarP(&proxies, "proxy", "p", make([]string, 0), "proxies share links")
 	convertCmd.Flags().StringVarP(&template, "template", "t", "", "template file path or URL")
 	convertCmd.Flags().StringVarP(&output, "output", "o", "", "output file path")
 	convertCmd.Flags().StringVarP(&delete, "delete", "d", "", "delete proxies with regex")
-	convertCmd.Flags().StringToStringVarP(&rename, "rename", "r", nil, "rename proxies with regex")
+	convertCmd.Flags().StringToStringVarP(&rename, "rename", "r", make(map[string]string), "rename proxies with regex")
 	convertCmd.Flags().BoolVarP(&group, "group", "g", false, "grouping proxies by country")
 	convertCmd.Flags().StringVarP(&groupType, "group-type", "G", "", "group type, selector or urltest")
 	convertCmd.Flags().StringVarP(&sortKey, "sort", "S", "", "sort key, tag or num")
