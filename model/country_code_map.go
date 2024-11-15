@@ -1077,6 +1077,9 @@ func GetContryName(tag string) string {
 var values []string
 
 func IsCountryGroup(tag string) bool {
+	if tag == "其他地区" {
+		return true
+	}
 	return slices.Contains(values, tag)
 }
 

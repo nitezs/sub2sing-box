@@ -34,9 +34,9 @@ func init() {
 	convertCmd.Flags().StringVarP(&delete, "delete", "d", "", "delete proxies with regex")
 	convertCmd.Flags().StringToStringVarP(&rename, "rename", "r", nil, "rename proxies with regex")
 	convertCmd.Flags().BoolVarP(&group, "group", "g", false, "grouping proxies by country")
-	convertCmd.Flags().StringVarP(&groupType, "group-type", "G", "selector", "group type, selector or urltest")
-	convertCmd.Flags().StringVarP(&sortKey, "sort", "S", "tag", "sort key, tag or num")
-	convertCmd.Flags().StringVarP(&sortType, "sort-type", "T", "asc", "sort type, asc or desc")
+	convertCmd.Flags().StringVarP(&groupType, "group-type", "G", "", "group type, selector or urltest")
+	convertCmd.Flags().StringVarP(&sortKey, "sort", "S", "", "sort key, tag or num")
+	convertCmd.Flags().StringVarP(&sortType, "sort-type", "T", "", "sort type, asc or desc")
 	convertCmd.Flags().StringVarP(&config, "config", "c", "", "configuration file path")
 	RootCmd.AddCommand(convertCmd)
 }
@@ -80,7 +80,7 @@ func convertRun(cmd *cobra.Command, args []string) {
 func loadConfig() {
 	if config == "" {
 		if wd, err := os.Getwd(); err == nil {
-			config = filepath.Join(wd, "github.com/nitezs/sub2sing-box.json")
+			config = filepath.Join(wd, "sub2sing-box.json")
 			if _, err := os.Stat(config); os.IsNotExist(err) {
 				return
 			}
@@ -106,29 +106,37 @@ func loadConfig() {
 }
 
 func mergeConfig(cfg model.ConvertRequest) {
-	if len(subscriptions) == 0 {
-		subscriptions = cfg.Subscriptions
-	}
-	if len(proxies) == 0 {
-		proxies = cfg.Proxies
-	}
+	subscriptions = append(subscriptions, cfg.Subscriptions...)
+	proxies = append(proxies, cfg.Proxies...)
 	if template == "" {
 		template = cfg.Template
 	}
 	if delete == "" {
 		delete = cfg.Delete
 	}
-	if len(rename) == 0 {
-		rename = cfg.Rename
+	for k, v := range cfg.Rename {
+		rename[k] = v
 	}
 	if groupType == "" {
-		groupType = cfg.GroupType
+		if cfg.GroupType != "" {
+			groupType = cfg.GroupType
+		} else {
+			groupType = "selector"
+		}
 	}
 	if sortKey == "" {
-		sortKey = cfg.SortKey
+		if cfg.SortKey != "" {
+			sortKey = cfg.SortKey
+		} else {
+			sortKey = "tag"
+		}
 	}
 	if sortType == "" {
-		sortType = cfg.SortType
+		if cfg.SortType != "" {
+			sortType = cfg.SortType
+		} else {
+			sortType = "asc"
+		}
 	}
 	if output == "" {
 		output = cfg.Output
