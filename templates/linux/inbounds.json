@@ -2,12 +2,12 @@
   "inbounds": [
     {
       "type": "tun",
+      "tag": "tun-in",
       "auto_route": true,
       "auto_redirect": true,
       "strict_route": true,
-      "sniff": true,
-      "address": ["172.16.0.1/30", "fdfe:dcba:9876::1/126"],
-      "exclude_interface": ["tailscale0"]
+      "address": ["192.168.135.1/30", "fdfe:dcba:9876::1/126"],
+      "route_exclude_address": ["100.64.0.0/10"]
     }
   ]
 }

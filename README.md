@@ -36,7 +36,7 @@ sub2sing-box convert -c ./sub2sing-box.json
 
 ### 默认模板
 
-默认模板位于 `templates` 目录，使用 `tun` 配置，可以根据需求自行修改模板内容。
+默认模板位于 `templates` 目录，使用 `tun` 配置，该配置仅供参考，请根据实际情况修改。
 
 ### 占位符
 

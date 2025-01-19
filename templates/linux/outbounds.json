@@ -8,14 +8,6 @@
     {
       "tag": "direct",
       "type": "direct"
-    },
-    {
-      "tag": "block",
-      "type": "block"
-    },
-    {
-      "tag": "dns",
-      "type": "dns"
     }
   ]
 }

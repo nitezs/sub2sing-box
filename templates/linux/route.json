@@ -2,17 +2,20 @@
   "route": {
     "rules": [
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "protocol": "dns"
-          },
-          {
-            "port": 53
-          }
-        ],
-        "outbound": "dns"
+        "action": "resolve",
+        "strategy": "prefer_ipv4"
+      },
+      {
+        "action": "sniff",
+        "timeout": "1s"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "port": [3478, 5348, 5349],
+        "outbound": "direct"
       },
       {
         "ip_is_private": true,
@@ -31,18 +34,27 @@
         "outbound": "default"
       },
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "rule_set": [
-              "geoip-cn",
-              "geosite-geolocation-cn",
-              "geosite-cn",
-              "geosite-category-games@cn",
-              "geosite-steam@cn"
-            ]
-          }
+        "rule_set": "geosite-bahamut",
+        "outbound": "台湾(TW)"
+      },
+      {
+        "domain_suffix": "online-fix.me",
+        "outbound": "香港(HK)"
+      },
+      {
+        "process_path_regex": [
+          "^.+/steam/compatibilitytools.d/.+",
+          "^.+/steamapps/common/.*"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "geoip-cn",
+          "geosite-geolocation-cn",
+          "geosite-cn",
+          "geosite-category-games@cn",
+          "geosite-steam@cn"
         ],
         "outbound": "direct"
       }
