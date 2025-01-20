@@ -149,11 +149,9 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 	}
 
 	result := model.Outbound{
-		Outbound: option.Outbound{
-			Type:    "vmess",
-			Tag:     name,
-			Options: outboundOptions,
-		},
+		Type:    "vmess",
+		Tag:     name,
+		Options: outboundOptions,
 	}
 
 	return result, nil

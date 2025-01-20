@@ -156,11 +156,11 @@ func ParseVless(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	result := model.Outbound{Outbound: option.Outbound{
+	result := model.Outbound{
 		Type:    "vless",
 		Tag:     remarks,
 		Options: outboundOptions,
-	}}
+	}
 
 	return result, nil
 }

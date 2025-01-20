@@ -7,6 +7,7 @@ import (
 
 	"github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
+
 	"github.com/sagernet/sing-box/option"
 	"github.com/sagernet/sing/common/json/badoption"
 )
@@ -147,11 +148,11 @@ func ParseTrojan(proxy string) (model.Outbound, error) {
 		}
 	}
 
-	result := model.Outbound{Outbound: option.Outbound{
+	result := model.Outbound{
 		Type:    "trojan",
 		Tag:     remarks,
 		Options: outboundOptions,
-	}}
+	}
 
 	return result, nil
 }

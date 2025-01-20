@@ -1,6 +1,7 @@
 package common
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,12 +12,17 @@ import (
 	"strings"
 
 	"github.com/nitezs/sub2sing-box/constant"
-	C "github.com/nitezs/sub2sing-box/constant"
 	"github.com/nitezs/sub2sing-box/model"
 	"github.com/nitezs/sub2sing-box/parser"
 	"github.com/nitezs/sub2sing-box/util"
+	box "github.com/sagernet/sing-box"
+	C "github.com/sagernet/sing-box/constant"
+	"github.com/sagernet/sing-box/include"
 	"github.com/sagernet/sing-box/option"
+	J "github.com/sagernet/sing/common/json"
 )
+
+var globalCtx = box.Context(context.Background(), include.InboundRegistry(), include.OutboundRegistry(), include.EndpointRegistry())
 
 func Convert(
 	subscriptions []string,
@@ -58,53 +64,56 @@ func Convert(
 		}
 	}
 
-	keep := make(map[int]bool)
-	set := make(map[string]struct {
-		Proxy model.Outbound
-		Count int
-	})
+	set := make(map[string]bool)
+	deduplicatedOutbounds := make([]model.Outbound, 0)
+	for _, p := range outbounds {
+		jsonBytes, err := json.Marshal(p)
+		if err != nil {
+			return "", err
+		}
+		if _, exists := set[string(jsonBytes)]; !exists {
+			set[string(jsonBytes)] = true
+			deduplicatedOutbounds = append(deduplicatedOutbounds, p)
+		}
+	}
+	outbounds = deduplicatedOutbounds
+
+	tagSet := make(map[string]bool)
 	for i, p := range outbounds {
-		if _, exists := set[p.Tag]; !exists {
-			keep[i] = true
-			set[p.Tag] = struct {
-				Proxy model.Outbound
-				Count int
-			}{p, 0}
-		} else {
-			p1, _ := json.Marshal(p)
-			p2, _ := json.Marshal(set[p.Tag])
-			if string(p1) != string(p2) {
-				set[p.Tag] = struct {
-					Proxy model.Outbound
-					Count int
-				}{p, set[p.Tag].Count + 1}
-				keep[i] = true
-				outbounds[i].Tag = fmt.Sprintf("%s %d", p.Tag, set[p.Tag].Count)
-			} else {
-				keep[i] = false
+		if _, exists := tagSet[p.Tag]; exists {
+			count := 1
+			for {
+				newTag := fmt.Sprintf("%s %d", p.Tag, count)
+				if _, exists := tagSet[newTag]; !exists {
+					outbounds[i].Tag = newTag
+					break
+				} else {
+					count++
+				}
 			}
 		}
 	}
+
 	if enableGroup {
 		outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
 	}
 	if templatePath != "" {
-		templateDate, err := ReadTemplate(templatePath)
+		templateData, err := ReadTemplate(templatePath)
 		if err != nil {
 			return "", err
 		}
 		reg := regexp.MustCompile("\"<[A-Za-z]{2}>\"")
 		group := false
 		for _, v := range model.CountryEnglishName {
-			if strings.Contains(templateDate, v) {
+			if strings.Contains(templateData, v) {
 				group = true
 			}
 		}
-		if !enableGroup && (reg.MatchString(templateDate) || strings.Contains(templateDate, constant.AllCountryTags) || group) {
+		if !enableGroup && (reg.MatchString(templateData) || strings.Contains(templateData, constant.AllCountryTags) || group) {
 			outbounds = AddCountryGroup(outbounds, groupType, sortKey, sortType)
 		}
 		var template model.Options
-		if err = json.Unmarshal([]byte(templateDate), &template); err != nil {
+		if template, err = J.UnmarshalExtendedContext[model.Options](globalCtx, []byte(templateData)); err != nil {
 			return "", err
 		}
 		result, err = MergeTemplate(outbounds, &template)
@@ -112,8 +121,15 @@ func Convert(
 			return "", err
 		}
 	} else {
-		r, err := json.Marshal(outbounds)
-		result = string(r)
+		outboundJsons := make([]string, 0)
+		for _, p := range outbounds {
+			b, err := json.Marshal(p)
+			if err != nil {
+				return "", err
+			}
+			outboundJsons = append(outboundJsons, string(b))
+		}
+		result = fmt.Sprintf("[%s]", strings.Join(outboundJsons, ","))
 		if err != nil {
 			return "", err
 		}
@@ -128,29 +144,25 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 		if p.Type != C.TypeSelector && p.Type != C.TypeURLTest {
 			country := model.GetContryName(p.Tag)
 			if group, ok := newGroup[country]; ok {
-				group.SetOutbounds(append(group.GetOutbounds(), p.Tag))
+				AppendOutbound(&group, p.Tag)
 				newGroup[country] = group
 			} else {
 				if groupType == C.TypeSelector || groupType == "" {
 					newGroup[country] = model.Outbound{
-						Outbound: option.Outbound{
-							Tag:  country,
-							Type: groupType,
-							Options: option.SelectorOutboundOptions{
-								Outbounds:                 []string{p.Tag},
-								InterruptExistConnections: true,
-							},
+						Tag:  country,
+						Type: groupType,
+						Options: option.SelectorOutboundOptions{
+							Outbounds:                 []string{p.Tag},
+							InterruptExistConnections: true,
 						},
 					}
 				} else if groupType == C.TypeURLTest {
 					newGroup[country] = model.Outbound{
-						Outbound: option.Outbound{
-							Tag:  country,
-							Type: groupType,
-							Options: option.URLTestOutboundOptions{
-								Outbounds:                 []string{p.Tag},
-								InterruptExistConnections: true,
-							},
+						Tag:  country,
+						Type: groupType,
+						Options: option.URLTestOutboundOptions{
+							Outbounds:                 []string{p.Tag},
+							InterruptExistConnections: true,
 						},
 					}
 				}
@@ -227,7 +239,7 @@ func MergeTemplate(outbounds []model.Outbound, template *model.Options) (string,
 	for i, outbound := range template.Outbounds {
 		if outbound.Type == C.TypeSelector || outbound.Type == C.TypeURLTest {
 			var parsedOutbound []string = make([]string, 0)
-			for _, o := range outbound.GetOutbounds() {
+			for _, o := range GetOutbounds(&outbound) {
 				if o == constant.AllProxyTags {
 					parsedOutbound = append(parsedOutbound, proxyTags...)
 				} else if o == constant.AllCountryTags {
@@ -235,16 +247,23 @@ func MergeTemplate(outbounds []model.Outbound, template *model.Options) (string,
 				} else if reg.MatchString(o) {
 					country := strings.ToUpper(strings.Trim(reg.FindString(o), "<>"))
 					if group, ok := groups[country]; ok {
-						parsedOutbound = append(parsedOutbound, group.GetOutbounds()...)
+						parsedOutbound = append(parsedOutbound, GetOutbounds(&group)...)
 					}
 				} else {
 					parsedOutbound = append(parsedOutbound, o)
 				}
 			}
-			template.Outbounds[i].SetOutbounds(parsedOutbound)
+			SetOutbounds(&template.Outbounds[i], parsedOutbound)
 		}
 	}
 	template.Outbounds = append(template.Outbounds, outbounds...)
+
+	for i := range template.DNS.Rules {
+		if template.DNS.Rules[i].Type == "" {
+			template.DNS.Rules[i].Type = C.RuleTypeDefault
+		}
+	}
+
 	data, err := json.Marshal(template)
 	if err != nil {
 		return "", err
@@ -263,18 +282,6 @@ func ConvertCProxyToSProxy(proxy string) (model.Outbound, error) {
 		}
 	}
 	return model.Outbound{}, errors.New("unknown proxy format")
-}
-
-func ConvertCProxyToJson(proxy string) (string, error) {
-	sProxy, err := ConvertCProxyToSProxy(proxy)
-	if err != nil {
-		return "", err
-	}
-	data, err := json.Marshal(&sProxy)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
 }
 
 func ConvertSubscriptionsToSProxy(urls []string) ([]model.Outbound, error) {
@@ -307,18 +314,6 @@ func ConvertSubscriptionsToSProxy(urls []string) ([]model.Outbound, error) {
 	return proxyList, nil
 }
 
-func ConvertSubscriptionsToJson(urls []string) (string, error) {
-	proxyList, err := ConvertSubscriptionsToSProxy(urls)
-	if err != nil {
-		return "", err
-	}
-	result, err := json.Marshal(proxyList)
-	if err != nil {
-		return "", err
-	}
-	return string(result), nil
-}
-
 func DeleteProxy(proxies []model.Outbound, regex string) ([]model.Outbound, error) {
 	reg, err := regexp.Compile(regex)
 	if err != nil {
@@ -344,4 +339,36 @@ func RenameProxy(proxies []model.Outbound, regex string, replaceText string) ([]
 		}
 	}
 	return proxies, nil
+}
+
+func SetOutbounds(outbound *model.Outbound, outbounds []string) {
+	switch v := outbound.Options.(type) {
+	case option.SelectorOutboundOptions:
+		v.Outbounds = outbounds
+		outbound.Options = v
+	case option.URLTestOutboundOptions:
+		v.Outbounds = outbounds
+		outbound.Options = v
+	}
+}
+
+func AppendOutbound(outbound *model.Outbound, outboundTag string) {
+	switch v := outbound.Options.(type) {
+	case option.SelectorOutboundOptions:
+		v.Outbounds = append(v.Outbounds, outboundTag)
+		outbound.Options = v
+	case option.URLTestOutboundOptions:
+		v.Outbounds = append(v.Outbounds, outboundTag)
+		outbound.Options = v
+	}
+}
+
+func GetOutbounds(outbound *model.Outbound) []string {
+	switch v := outbound.Options.(type) {
+	case option.SelectorOutboundOptions:
+		return v.Outbounds
+	case option.URLTestOutboundOptions:
+		return v.Outbounds
+	}
+	return nil
 }

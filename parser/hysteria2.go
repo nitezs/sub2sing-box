@@ -99,11 +99,9 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 	}
 
 	result := model.Outbound{
-		Outbound: option.Outbound{
-			Type:    "hysteria2",
-			Tag:     strings.TrimSpace(remarks),
-			Options: outboundOptions,
-		},
+		Type:    "hysteria2",
+		Tag:     strings.TrimSpace(remarks),
+		Options: outboundOptions,
 	}
 
 	return result, nil

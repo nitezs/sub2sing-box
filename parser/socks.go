@@ -81,10 +81,8 @@ func ParseSocks(proxy string) (model.Outbound, error) {
 	}
 
 	return model.Outbound{
-		Outbound: option.Outbound{
-			Type:    "socks",
-			Tag:     remarks,
-			Options: outboundOptions,
-		},
+		Type:    "socks",
+		Tag:     remarks,
+		Options: outboundOptions,
 	}, nil
 }
