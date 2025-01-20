@@ -38,6 +38,10 @@ func Convert(
 	result := ""
 	var err error
 
+	if groupType == "" {
+		groupType = C.TypeSelector
+	}
+
 	outbounds, err := ConvertSubscriptionsToSProxy(subscriptions)
 	if err != nil {
 		return "", err
@@ -116,6 +120,15 @@ func Convert(
 		if template, err = J.UnmarshalExtendedContext[model.Options](globalCtx, []byte(templateData)); err != nil {
 			return "", err
 		}
+		for _, v := range template.Options.Outbounds {
+			template.Outbounds = append(template.Outbounds, (model.Outbound)(v))
+		}
+		for _, v := range template.Options.Inbounds {
+			template.Inbounds = append(template.Inbounds, (model.Inbound)(v))
+		}
+		for _, v := range template.Options.Endpoints {
+			template.Endpoints = append(template.Endpoints, (model.Endpoint)(v))
+		}
 		result, err = MergeTemplate(outbounds, &template)
 		if err != nil {
 			return "", err
@@ -147,7 +160,7 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 				AppendOutbound(&group, p.Tag)
 				newGroup[country] = group
 			} else {
-				if groupType == C.TypeSelector || groupType == "" {
+				if groupType == C.TypeSelector {
 					newGroup[country] = model.Outbound{
 						Tag:  country,
 						Type: groupType,
@@ -173,23 +186,25 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 	for _, p := range newGroup {
 		groups = append(groups, p)
 	}
-	if sortType == "asc" {
-		switch sortKey {
-		case "tag":
-			sort.Sort(model.SortByTag(groups))
-		case "num":
-			sort.Sort(model.SortByNumber(groups))
-		default:
-			sort.Sort(model.SortByTag(groups))
-		}
-	} else {
-		switch sortKey {
-		case "tag":
-			sort.Sort(sort.Reverse(model.SortByTag(groups)))
-		case "num":
-			sort.Sort(sort.Reverse(model.SortByNumber(groups)))
-		default:
-			sort.Sort(sort.Reverse(model.SortByTag(groups)))
+	if sortType != "" {
+		if sortType == "asc" {
+			switch sortKey {
+			case "tag":
+				sort.Sort(model.SortByTag(groups))
+			case "num":
+				sort.Sort(model.SortByNumber(groups))
+			default:
+				sort.Sort(model.SortByTag(groups))
+			}
+		} else {
+			switch sortKey {
+			case "tag":
+				sort.Sort(sort.Reverse(model.SortByTag(groups)))
+			case "num":
+				sort.Sort(sort.Reverse(model.SortByNumber(groups)))
+			default:
+				sort.Sort(sort.Reverse(model.SortByTag(groups)))
+			}
 		}
 	}
 	return append(proxies, groups...)
@@ -236,7 +251,8 @@ func MergeTemplate(outbounds []model.Outbound, template *model.Options) (string,
 		}
 	}
 	reg := regexp.MustCompile("<[A-Za-z]{2}>")
-	for i, outbound := range template.Outbounds {
+	for i, o := range template.Outbounds {
+		outbound := (model.Outbound)(o)
 		if outbound.Type == C.TypeSelector || outbound.Type == C.TypeURLTest {
 			var parsedOutbound []string = make([]string, 0)
 			for _, o := range GetOutbounds(&outbound) {
@@ -349,6 +365,12 @@ func SetOutbounds(outbound *model.Outbound, outbounds []string) {
 	case option.URLTestOutboundOptions:
 		v.Outbounds = outbounds
 		outbound.Options = v
+	case *option.SelectorOutboundOptions:
+		v.Outbounds = outbounds
+		outbound.Options = v
+	case *option.URLTestOutboundOptions:
+		v.Outbounds = outbounds
+		outbound.Options = v
 	}
 }
 
@@ -360,6 +382,12 @@ func AppendOutbound(outbound *model.Outbound, outboundTag string) {
 	case option.URLTestOutboundOptions:
 		v.Outbounds = append(v.Outbounds, outboundTag)
 		outbound.Options = v
+	case *option.SelectorOutboundOptions:
+		v.Outbounds = append(v.Outbounds, outboundTag)
+		outbound.Options = v
+	case *option.URLTestOutboundOptions:
+		v.Outbounds = append(v.Outbounds, outboundTag)
+		outbound.Options = v
 	}
 }
 
@@ -368,6 +396,10 @@ func GetOutbounds(outbound *model.Outbound) []string {
 	case option.SelectorOutboundOptions:
 		return v.Outbounds
 	case option.URLTestOutboundOptions:
+		return v.Outbounds
+	case *option.SelectorOutboundOptions:
+		return v.Outbounds
+	case *option.URLTestOutboundOptions:
 		return v.Outbounds
 	}
 	return nil
