@@ -107,20 +107,22 @@ func ParseShadowsocks(proxy string) (model.Outbound, error) {
 	}
 	remarks = strings.TrimSpace(remarks)
 
+	outboundOptions := option.ShadowsocksOutboundOptions{
+		ServerOptions: option.ServerOptions{
+			Server:     server,
+			ServerPort: port,
+		},
+		Method:        method,
+		Password:      password,
+		Plugin:        plugin,
+		PluginOptions: options,
+	}
+
 	result := model.Outbound{
 		Outbound: option.Outbound{
-			Type: "shadowsocks",
-			Tag:  remarks,
-			ShadowsocksOptions: option.ShadowsocksOutboundOptions{
-				ServerOptions: option.ServerOptions{
-					Server:     server,
-					ServerPort: port,
-				},
-				Method:        method,
-				Password:      password,
-				Plugin:        plugin,
-				PluginOptions: options,
-			},
+			Type:    "shadowsocks",
+			Tag:     remarks,
+			Options: outboundOptions,
 		},
 	}
 	return result, nil

@@ -71,36 +71,40 @@ func ParseHysteria2(proxy string) (model.Outbound, error) {
 	}
 	remarks = strings.TrimSpace(remarks)
 
-	result := model.Outbound{
-		Outbound: option.Outbound{
-			Type: "hysteria2",
-			Tag:  strings.TrimSpace(remarks),
-			Hysteria2Options: option.Hysteria2OutboundOptions{
-				ServerOptions: option.ServerOptions{
-					Server:     server,
-					ServerPort: port,
-				},
-				Password: password,
-				OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
-					TLS: &option.OutboundTLSOptions{
-						Enabled:    enableTLS,
-						Insecure:   insecureBool,
-						ServerName: sni,
-						ALPN:       alpn,
-					},
-				},
-				Network: option.NetworkList(network),
+	outboundOptions := option.Hysteria2OutboundOptions{
+		ServerOptions: option.ServerOptions{
+			Server:     server,
+			ServerPort: port,
+		},
+		Password: password,
+		OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
+				Enabled:    enableTLS,
+				Insecure:   insecureBool,
+				ServerName: sni,
+				ALPN:       alpn,
 			},
 		},
+		Network: option.NetworkList(network),
 	}
+
 	if pinSHA256 != "" {
-		result.Hysteria2Options.OutboundTLSOptionsContainer.TLS.Certificate = []string{pinSHA256}
+		outboundOptions.TLS.Certificate = []string{pinSHA256}
 	}
 	if obfs != "" {
-		result.Hysteria2Options.Obfs = &option.Hysteria2Obfs{
+		outboundOptions.Obfs = &option.Hysteria2Obfs{
 			Type:     obfs,
 			Password: obfsPassword,
 		}
 	}
+
+	result := model.Outbound{
+		Outbound: option.Outbound{
+			Type:    "hysteria2",
+			Tag:     strings.TrimSpace(remarks),
+			Options: outboundOptions,
+		},
+	}
+
 	return result, nil
 }

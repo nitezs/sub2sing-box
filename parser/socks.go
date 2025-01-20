@@ -70,18 +70,21 @@ func ParseSocks(proxy string) (model.Outbound, error) {
 			password = splitStr[1]
 		}
 	}
+
+	outboundOptions := option.SOCKSOutboundOptions{
+		ServerOptions: option.ServerOptions{
+			Server:     server,
+			ServerPort: port,
+		},
+		Username: username,
+		Password: password,
+	}
+
 	return model.Outbound{
 		Outbound: option.Outbound{
-			Type: "socks",
-			Tag:  remarks,
-			SocksOptions: option.SocksOutboundOptions{
-				ServerOptions: option.ServerOptions{
-					Server:     server,
-					ServerPort: port,
-				},
-				Username: username,
-				Password: password,
-			},
+			Type:    "socks",
+			Tag:     remarks,
+			Options: outboundOptions,
 		},
 	}, nil
 }

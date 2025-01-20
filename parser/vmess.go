@@ -10,6 +10,7 @@ import (
 	"github.com/nitezs/sub2sing-box/model"
 	"github.com/nitezs/sub2sing-box/util"
 	"github.com/sagernet/sing-box/option"
+	"github.com/sagernet/sing/common/json/badoption"
 )
 
 func ParseVmess(proxy string) (model.Outbound, error) {
@@ -64,20 +65,14 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		name = vmess.Ps
 	}
 
-	result := model.Outbound{
-		Outbound: option.Outbound{
-			Type: "vmess",
-			Tag:  name,
-			VMessOptions: option.VMessOutboundOptions{
-				ServerOptions: option.ServerOptions{
-					Server:     vmess.Add,
-					ServerPort: port,
-				},
-				UUID:     vmess.Id,
-				AlterId:  aid,
-				Security: vmess.Scy,
-			},
+	outboundOptions := option.VMessOutboundOptions{
+		ServerOptions: option.ServerOptions{
+			Server:     vmess.Add,
+			ServerPort: port,
 		},
+		UUID:     vmess.Id,
+		AlterId:  aid,
+		Security: vmess.Scy,
 	}
 
 	if vmess.Tls == "tls" {
@@ -87,7 +82,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		} else {
 			alpn = nil
 		}
-		result.VMessOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
+		outboundOptions.OutboundTLSOptionsContainer = option.OutboundTLSOptionsContainer{
 			TLS: &option.OutboundTLSOptions{
 				Enabled: true,
 				UTLS: &option.OutboundUTLSOptions{
@@ -98,7 +93,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 			},
 		}
 		if vmess.Fp != "" {
-			result.VMessOptions.OutboundTLSOptionsContainer.TLS.UTLS = &option.OutboundUTLSOptions{
+			outboundOptions.OutboundTLSOptionsContainer.TLS.UTLS = &option.OutboundUTLSOptions{
 				Enabled:     true,
 				Fingerprint: vmess.Fp,
 			}
@@ -112,11 +107,11 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 		if vmess.Host == "" {
 			vmess.Host = vmess.Add
 		}
-		result.VMessOptions.Transport = &option.V2RayTransportOptions{
+		outboundOptions.Transport = &option.V2RayTransportOptions{
 			Type: "ws",
 			WebsocketOptions: option.V2RayWebsocketOptions{
 				Path: vmess.Path,
-				Headers: map[string]option.Listable[string]{
+				Headers: badoption.HTTPHeader{
 					"Host": {vmess.Host},
 				},
 			},
@@ -125,7 +120,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 
 	if vmess.Net == "quic" {
 		quic := option.V2RayQUICOptions{}
-		result.VMessOptions.Transport = &option.V2RayTransportOptions{
+		outboundOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "quic",
 			QUICOptions: quic,
 		}
@@ -136,7 +131,7 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 			ServiceName:         vmess.Path,
 			PermitWithoutStream: true,
 		}
-		result.VMessOptions.Transport = &option.V2RayTransportOptions{
+		outboundOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "grpc",
 			GRPCOptions: grpc,
 		}
@@ -147,10 +142,18 @@ func ParseVmess(proxy string) (model.Outbound, error) {
 			Host: strings.Split(vmess.Host, ","),
 			Path: vmess.Path,
 		}
-		result.VMessOptions.Transport = &option.V2RayTransportOptions{
+		outboundOptions.Transport = &option.V2RayTransportOptions{
 			Type:        "http",
 			HTTPOptions: httpOps,
 		}
+	}
+
+	result := model.Outbound{
+		Outbound: option.Outbound{
+			Type:    "vmess",
+			Tag:     name,
+			Options: outboundOptions,
+		},
 	}
 
 	return result, nil

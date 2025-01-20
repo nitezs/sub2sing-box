@@ -72,26 +72,28 @@ func ParseHysteria(proxy string) (model.Outbound, error) {
 	}
 	remarks = strings.TrimSpace(remarks)
 
-	return model.Outbound{Outbound: option.Outbound{
-		Type: "hysteria",
-		Tag:  remarks,
-		HysteriaOptions: option.HysteriaOutboundOptions{
-			ServerOptions: option.ServerOptions{
-				Server:     server,
-				ServerPort: port,
-			},
-			Up:      upmbps,
-			Down:    downmbps,
-			Auth:    []byte(auth),
-			Obfs:    obfs,
-			Network: option.NetworkList(protocol),
-			OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
-				TLS: &option.OutboundTLSOptions{
-					Enabled:  enableTLS,
-					Insecure: insecureBool,
-					ALPN:     alpn,
-				},
+	outboundOptions := option.HysteriaOutboundOptions{
+		ServerOptions: option.ServerOptions{
+			Server:     server,
+			ServerPort: port,
+		},
+		Up:      upmbps,
+		Down:    downmbps,
+		Auth:    []byte(auth),
+		Obfs:    obfs,
+		Network: option.NetworkList(protocol),
+		OutboundTLSOptionsContainer: option.OutboundTLSOptionsContainer{
+			TLS: &option.OutboundTLSOptions{
+				Enabled:  enableTLS,
+				Insecure: insecureBool,
+				ALPN:     alpn,
 			},
 		},
+	}
+
+	return model.Outbound{Outbound: option.Outbound{
+		Type:    "hysteria",
+		Tag:     remarks,
+		Options: outboundOptions,
 	}}, nil
 }

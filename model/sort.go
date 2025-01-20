@@ -1,7 +1,7 @@
 package model
 
 import (
-	C "github.com/nitezs/sub2sing-box/constant"
+	"github.com/sagernet/sing-box/option"
 
 	"golang.org/x/text/collate"
 	"golang.org/x/text/language"
@@ -13,17 +13,17 @@ func (a SortByNumber) Len() int      { return len(a) }
 func (a SortByNumber) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
 func (a SortByNumber) Less(i, j int) bool {
 	var size1, size2 int
-	if a[i].Type == C.TypeSelector {
-		size1 = len(a[i].SelectorOptions.Outbounds)
+	switch v := a[i].Options.(type) {
+	case option.SelectorOutboundOptions:
+		size1 = len(v.Outbounds)
+	case option.URLTestOutboundOptions:
+		size1 = len(v.Outbounds)
 	}
-	if a[i].Type == C.TypeURLTest {
-		size1 = len(a[j].URLTestOptions.Outbounds)
-	}
-	if a[j].Type == C.TypeSelector {
-		size2 = len(a[j].SelectorOptions.Outbounds)
-	}
-	if a[j].Type == C.TypeURLTest {
-		size2 = len(a[j].URLTestOptions.Outbounds)
+	switch v := a[j].Options.(type) {
+	case option.SelectorOutboundOptions:
+		size2 = len(v.Outbounds)
+	case option.URLTestOutboundOptions:
+		size2 = len(v.Outbounds)
 	}
 	return size1 < size2
 }

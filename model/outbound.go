@@ -1,7 +1,6 @@
 package model
 
 import (
-	C "github.com/nitezs/sub2sing-box/constant"
 	"github.com/sagernet/sing-box/option"
 )
 
@@ -10,20 +9,22 @@ type Outbound struct {
 }
 
 func (h *Outbound) GetOutbounds() []string {
-	if h.Type == C.TypeSelector {
-		return h.SelectorOptions.Outbounds
-	}
-	if h.Type == C.TypeURLTest {
-		return h.URLTestOptions.Outbounds
+	switch v := h.Options.(type) {
+	case option.URLTestOutboundOptions:
+		return v.Outbounds
+	case option.SelectorOutboundOptions:
+		return v.Outbounds
 	}
 	return nil
 }
 
 func (h *Outbound) SetOutbounds(outbounds []string) {
-	if h.Type == C.TypeSelector {
-		h.SelectorOptions.Outbounds = outbounds
-	}
-	if h.Type == C.TypeURLTest {
-		h.URLTestOptions.Outbounds = outbounds
+	switch v := h.Options.(type) {
+	case option.URLTestOutboundOptions:
+		v.Outbounds = outbounds
+		h.Options = v
+	case option.SelectorOutboundOptions:
+		v.Outbounds = outbounds
+		h.Options = v
 	}
 }

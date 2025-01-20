@@ -136,7 +136,7 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 						Outbound: option.Outbound{
 							Tag:  country,
 							Type: groupType,
-							SelectorOptions: option.SelectorOutboundOptions{
+							Options: option.SelectorOutboundOptions{
 								Outbounds:                 []string{p.Tag},
 								InterruptExistConnections: true,
 							},
@@ -147,7 +147,7 @@ func AddCountryGroup(proxies []model.Outbound, groupType string, sortKey string,
 						Outbound: option.Outbound{
 							Tag:  country,
 							Type: groupType,
-							URLTestOptions: option.URLTestOutboundOptions{
+							Options: option.URLTestOutboundOptions{
 								Outbounds:                 []string{p.Tag},
 								InterruptExistConnections: true,
 							},
