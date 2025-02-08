@@ -1,19 +1,24 @@
 <!DOCTYPE html>
-<html lang="zh-CN" class="mdui-theme-auto">
-
+<html lang="en" class="mdui-theme-auto">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>sub2sing-box</title>
+  <!-- Include Material Design UI CSS -->
   <link rel="stylesheet" href="https://unpkg.com/mdui@2/mdui.css" />
+  <!-- Include Google Fonts with Chinese support -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto|Noto+Sans+SC&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
   <script src="https://unpkg.com/mdui@2/mdui.global.js"></script>
   <style>
+    /* Apply a uniform font across Chinese, Russian, and English */
+    body {
+      font-family: "Roboto", "Noto Sans SC", sans-serif;
+    }
     h3 {
       margin-top: 0;
     }
-
     .section {
       margin: 20px 0;
       padding: 15px;
@@ -21,232 +26,351 @@
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
       background-color: rgb(var(--mdui-color-surface-container));
     }
-
-    .section>* {
+    .section > * {
       margin-bottom: 10px;
     }
-
     .mdui-container {
       border-radius: 10px;
       max-width: 1200px;
       margin: 30px auto;
     }
+    .header-controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+    /* Rename fields: now stacked in a wide layout */
+    .rename-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
   </style>
 </head>
-
 <body>
   <div class="mdui-container">
-    <div style="
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        ">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
       <h2>
         <a href="https://github.com/nitezs/sub2sing-box" target="_blank">sub2sing-box</a>
       </h2>
-      <mdui-dropdown trigger="hover">
-        <mdui-icon slot="trigger" name="dark_mode"></mdui-icon>
-        <mdui-menu id="theme" selects="single" value="dark">
-          <mdui-menu-item value="light">亮色</mdui-menu-item>
-          <mdui-menu-item value="dark">暗色</mdui-menu-item>
-          <mdui-divider></mdui-divider>
-          <mdui-menu-item value="auto">跟随系统</mdui-menu-item>
-        </mdui-menu>
-      </mdui-dropdown>
+      <div class="header-controls">
+        <!-- Language switcher -->
+        <mdui-dropdown trigger="hover">
+          <mdui-icon slot="trigger" name="language"></mdui-icon>
+          <mdui-menu id="language" selects="single">
+            <mdui-menu-item value="zh-CN">中文</mdui-menu-item>
+            <mdui-menu-item value="en">English</mdui-menu-item>
+            <mdui-menu-item value="ru">Русский</mdui-menu-item>
+          </mdui-menu>
+        </mdui-dropdown>
+        <!-- Theme switcher -->
+        <mdui-dropdown trigger="hover">
+          <mdui-icon slot="trigger" name="dark_mode"></mdui-icon>
+          <mdui-menu id="theme" selects="single" value="dark">
+            <mdui-menu-item value="light" data-i18n="theme-light">Light</mdui-menu-item>
+            <mdui-menu-item value="dark" data-i18n="theme-dark">Dark</mdui-menu-item>
+            <mdui-divider></mdui-divider>
+            <mdui-menu-item value="auto" data-i18n="theme-auto">Auto</mdui-menu-item>
+          </mdui-menu>
+        </mdui-dropdown>
+      </div>
     </div>
     <!-- Template Section -->
-    <div class=" section">
-      <h3><a href="https://github.com/nitezs/sub2sing-box/tree/master/templates">模板</a></h3>
-      <mdui-text-field label="模板" type="text" id="template" name="template"
-        value="https://raw.githubusercontent.com/nitezs/sub2sing-box/refs/heads/master/templates/example-windows.json" />
+    <div class="section">
+      <h3>
+        <a href="https://github.com/nitezs/sub2sing-box/tree/master/templates" data-i18n="template">Template</a>
+      </h3>
+      <mdui-text-field data-i18n="template" label="Template" type="text" id="template" name="template"
+        value="https://raw.githubusercontent.com/nitezs/sub2sing-box/refs/heads/master/templates/example-windows.json">
+      </mdui-text-field>
     </div>
-
     <div id="form">
       <!-- Nodes Section -->
       <div class="section">
-        <h3>节点</h3>
+        <h3 data-i18n="nodes">Nodes</h3>
         <div>
-          <mdui-text-field label="订阅链接" autosize min-rows="3" max-rows="5" id="subscription" name="subscription"
-            placeholder="一行一个"></mdui-text-field>
+          <mdui-text-field data-i18n="subscription-link" 
+            data-i18n-placeholder="one-per-line" 
+            label="Subscription Link" type="text" id="subscription" name="subscription" 
+            placeholder="One per line">
+          </mdui-text-field>
         </div>
         <div>
-          <mdui-text-field label="节点分享链接" autosize min-rows="3" max-rows="5" id="proxy" name="proxy"
-            placeholder="一行一个"></mdui-text-field>
+          <mdui-text-field data-i18n="proxy-link" 
+            data-i18n-placeholder="one-per-line" 
+            label="Node Share Link" type="text" id="proxy" name="proxy"
+            placeholder="One per line">
+          </mdui-text-field>
         </div>
         <div>
-          <mdui-text-field label="删除节点" type="text" id="delete" name="delete" placeholder="支持正则表达式" />
+          <mdui-text-field data-i18n="delete-node" 
+            data-i18n-placeholder="supports-regex" 
+            label="Delete Node" type="text" id="delete" name="delete"
+            placeholder="Supports regex">
+          </mdui-text-field>
         </div>
         <div>
           <mdui-list id="list">
             <mdui-list-item>
-              重命名节点
-              <mdui-button slot="end-icon" type="button" onclick="addRenameField()">+
-              </mdui-button>
+              <span data-i18n="rename-node">Rename Node</span>
+              <mdui-button slot="end-icon" type="button" onclick="addRenameField()">+</mdui-button>
             </mdui-list-item>
           </mdui-list>
           <div id="renameContainer"></div>
         </div>
       </div>
-
       <!-- Policy Group Section -->
       <div class="section">
-        <h3>策略组</h3>
+        <h3 data-i18n="policy-group">Policy Group</h3>
         <div>
-          <mdui-text-field label="类型" type="text" id="group-type" name="group-type" value="selector" />
+          <mdui-text-field data-i18n="type" label="Type" type="text" id="group-type" name="group-type" 
+            value="selector">
+          </mdui-text-field>
         </div>
         <div>
-          <mdui-select label="排序依据" name="sort" id="sort" value="tag">
-            <mdui-menu-item value="tag" selected>节点名</mdui-menu-item>
-            <mdui-menu-item value="num">节点数量</mdui-menu-item>
+          <mdui-select data-i18n="sort-by" label="Sort By" name="sort" id="sort" value="tag">
+            <mdui-menu-item value="tag" selected data-i18n="node-name">Node Name</mdui-menu-item>
+            <mdui-menu-item value="num" data-i18n="node-count">Node Count</mdui-menu-item>
           </mdui-select>
         </div>
         <div>
-          <mdui-select label="排序方式" name="sort-type" id="sort-type" value="asc">
-            <mdui-menu-item value="asc" selected>升序</mdui-menu-item>
-            <mdui-menu-item value="desc">降序</mdui-menu-item>
+          <mdui-select data-i18n="sort-order" label="Sort Order" name="sort-type" id="sort-type" value="asc">
+            <mdui-menu-item value="asc" selected data-i18n="ascending">Ascending</mdui-menu-item>
+            <mdui-menu-item value="desc" data-i18n="descending">Descending</mdui-menu-item>
           </mdui-select>
         </div>
       </div>
-
       <!-- Result Section -->
       <div class="section">
-        <mdui-text-field label="生成链接" autosize min-rows="2" max-rows="5" id="output" name="output"></mdui-text-field>
+        <mdui-text-field data-i18n="generate-link" label="Generate Link" type="text" id="output" name="output">
+          <!-- Integrated copy icon inside the Generate Link text field -->
+          <mdui-icon slot="end-icon" onclick="copyLink()" style="cursor:pointer;">content_copy</mdui-icon>
+        </mdui-text-field>
+        <mdui-button color="primary" onclick="openProfileLink()">
+          <span data-i18n="import-profile">Import Profile</span>
+        </mdui-button>
       </div>
     </div>
   </div>
   <script>
-    init();
+    // Translation object (v11 parameters)
+    const translations = {
+      "zh-CN": {
+        "template": "模板",
+        "nodes": "节点",
+        "subscription-link": "订阅链接",
+        "proxy-link": "节点分享链接",
+        "delete-node": "删除节点",
+        "rename-node": "Переименовать узел",
+        "policy-group": "策略组",
+        "type": "类型",
+        "sort-by": "排序依据",
+        "node-name": "节点名",
+        "node-count": "节点数量",
+        "sort-order": "排序方式",
+        "ascending": "升序",
+        "descending": "降序",
+        "generate-link": "生成链接",
+        "theme-light": "亮色",
+        "theme-dark": "暗色",
+        "theme-auto": "跟随系统",
+        "import-profile": "导入配置",
+        "one-per-line": "一行一个",
+        "supports-regex": "支持正则表达式"
+      },
+      "en": {
+        "template": "Template",
+        "nodes": "Nodes",
+        "subscription-link": "Subscription Link",
+        "proxy-link": "Node Share Link",
+        "delete-node": "Delete Node",
+        "rename-node": "Rename Node",
+        "policy-group": "Policy Group",
+        "type": "Type",
+        "sort-by": "Sort By",
+        "node-name": "Node Name",
+        "node-count": "Node Count",
+        "sort-order": "Sort Order",
+        "ascending": "Ascending",
+        "descending": "Descending",
+        "generate-link": "Generate Link",
+        "theme-light": "Light",
+        "theme-dark": "Dark",
+        "theme-auto": "Auto",
+        "import-profile": "Import Profile",
+        "one-per-line": "One per line",
+        "supports-regex": "Supports regex"
+      },
+      "ru": {
+        "template": "Шаблон",
+        "nodes": "Узлы",
+        "subscription-link": "Ссылка подписки",
+        "proxy-link": "Ссылка на узел",
+        "delete-node": "Удалить узел",
+        "rename-node": "Переименовать узел",
+        "policy-group": "Группа политик",
+        "type": "Тип",
+        "sort-by": "Сортировать по",
+        "node-name": "Имя узла",
+        "node-count": "Количество узлов",
+        "sort-order": "Порядок сортировки",
+        "ascending": "По возрастанию",
+        "descending": "По убыванию",
+        "generate-link": "Создать ссылку",
+        "theme-light": "Светлая",
+        "theme-dark": "Темная",
+        "theme-auto": "Системная",
+        "import-profile": "Импортировать профиль",
+        "one-per-line": "Одна на строку",
+        "supports-regex": "Поддерживает рег. выражения"
+      }
+    };
 
-    function init() {
-      theme();
+    document.addEventListener('DOMContentLoaded', function() {
+      setupLanguage();
+      setupTheme();
       listenInput();
+      // Do not auto-generate link on page load to keep Generate Link empty
+    });
+
+    function setupLanguage() {
+      const languageMenu = document.getElementById('language');
+      if (languageMenu) {
+        const userLang = navigator.language || navigator.userLanguage;
+        const savedLang = localStorage.getItem('language') ||
+          (userLang.includes('zh') ? 'zh-CN' : userLang.includes('ru') ? 'ru' : 'en');
+        languageMenu.value = savedLang;
+        changeLanguage(savedLang);
+
+        languageMenu.addEventListener('change', function() {
+          changeLanguage(languageMenu.value);
+        });
+      }
     }
 
-    function theme() {
-      const theme = window.localStorage.getItem("theme");
-      if (theme) {
-        document.querySelector("html").className = "mdui-theme-" + theme;
-        document.getElementById("theme").value = theme;
-      } else {
-        document.querySelector("html").className = "mdui-theme-auto";
-        document.getElementById("theme").value = "auto";
-        window.localStorage.setItem("theme", "auto");
-      }
-      const icon = document.getElementById("theme");
-      const html = document.querySelector("html");
-      icon.addEventListener("change", function (e) {
-        switch (icon.value) {
-          case "light":
-            html.className = "mdui-theme-light";
-            window.localStorage.setItem("theme", "light");
-            break;
-          case "dark":
-            html.className = "mdui-theme-dark";
-            window.localStorage.setItem("theme", "dark");
-            break;
-          case "auto":
-            html.className = "mdui-theme-auto";
-            window.localStorage.setItem("theme", "auto");
-            break;
-        }
+    function changeLanguage(lang) {
+      localStorage.setItem('language', lang);
+      document.documentElement.setAttribute('lang', lang);
 
+      document.querySelectorAll('[data-i18n]').forEach(element => {
+        const key = element.getAttribute('data-i18n');
+        const translation = translations[lang][key];
+        if (translation) {
+          if (element.tagName.toLowerCase() === 'mdui-text-field' ||
+              element.tagName.toLowerCase() === 'mdui-select') {
+            element.setAttribute('label', translation);
+          } else {
+            element.textContent = translation;
+          }
+        }
+      });
+
+      document.querySelectorAll('mdui-text-field').forEach(element => {
+        const phKey = element.getAttribute('data-i18n-placeholder');
+        if (phKey && translations[lang][phKey]) {
+          element.setAttribute('placeholder', translations[lang][phKey]);
+        }
       });
     }
 
-    function encodeBase64(str) {
-      return btoa(
-        encodeURIComponent(str).replace(
-          /%([0-9A-F]{2})/g,
-          function (match, p1) {
-            return String.fromCharCode("0x" + p1);
-          }
-        )
-      )
-        .replace(/\+/g, "-")
-        .replace(/\//g, "_");
-    }
+    function setupTheme() {
+      const themeMenu = document.getElementById('theme');
+      const savedTheme = localStorage.getItem("theme") || "auto";
+      document.documentElement.className = "mdui-theme-" + savedTheme;
+      themeMenu.value = savedTheme;
 
-    function decodeBase64(str) {
-      return decodeURIComponent(
-        Array.prototype.map
-          .call(atob(str), function (c) {
-            return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-          })
-          .join("")
-      );
+      themeMenu.addEventListener("change", function() {
+        const newTheme = themeMenu.value;
+        document.documentElement.className = "mdui-theme-" + newTheme;
+        localStorage.setItem("theme", newTheme);
+      });
     }
 
     function listenInput() {
-      const inputs = document.querySelectorAll(
-        "mdui-checkbox, mdui-text-field"
-      );
-      for (let input of inputs) {
+      const inputs = document.querySelectorAll("mdui-text-field, mdui-select, mdui-checkbox");
+      inputs.forEach(input => {
         input.addEventListener("input", generateLink);
-      }
-      const selects = document.querySelectorAll("mdui-select");
-      for (let select of selects) {
-        select.addEventListener("change", generateLink);
-      }
+        input.addEventListener("change", generateLink);
+      });
     }
 
-    function cleanLisnter() {
+    function cleanListeners() {
       const inputs = document.querySelectorAll("#form input, #form textarea");
-      for (let input of inputs) {
+      inputs.forEach(input => {
         input.removeEventListener("input", generateLink);
-      }
+      });
       const selects = document.querySelectorAll("#form select");
-      for (let select of selects) {
+      selects.forEach(select => {
         select.removeEventListener("change", generateLink);
-      }
+      });
     }
 
+    // Rename field parameters from v11 - fields are now wide (stacked)
     function addRenameField() {
-      cleanLisnter();
+      cleanListeners();
       const container = document.getElementById("list");
-      const fieldHTML = `<mdui-list-item class="rename-group">
-                    <mdui-text-field slot="icon" type="text" name="rename_from[]" placeholder="支持正则表达式" label="原字符"></mdui-text-field>
-                    <mdui-text-field type="text" name="rename_to[]" label="替换字符"></mdui-text-field>
-                    <mdui-button slot="end-icon" type="button" class="btn btn-danger" onclick="removeThisField(this)">-</mdui-button>
-                </mdui-list-item>`;
+      const currentLang = localStorage.getItem('language') || 'en';
+      const fieldHTML = `
+        <mdui-list-item class="rename-group">
+          <mdui-text-field type="text" name="rename_from[]" data-i18n-placeholder="delete-node"
+            label="${translations[currentLang]['delete-node']}" data-i18n="rename-node">
+          </mdui-text-field>
+          <mdui-text-field type="text" name="rename_to[]" 
+            label="${translations[currentLang]['rename-node']}" data-i18n="rename-node">
+          </mdui-text-field>
+          <mdui-button slot="end-icon" type="button" onclick="removeThisField(this)">-</mdui-button>
+        </mdui-list-item>`;
       container.insertAdjacentHTML("beforeend", fieldHTML);
       listenInput();
     }
 
     function removeThisField(button) {
-      cleanLisnter();
+      cleanListeners();
       button.parentElement.remove();
       generateLink();
       listenInput();
     }
 
     function generateLink() {
-      const subscription = document
-        .getElementById("subscription")
-        .value.split("\n")
-        .filter((i) => i);
-      const proxy = document
-        .getElementById("proxy")
-        .value.split("\n")
-        .filter((i) => i);
+      const subscription = document.getElementById("subscription").value
+        .split("\n").filter(i => i.trim());
+      const proxy = document.getElementById("proxy").value
+        .split("\n").filter(i => i.trim());
       const deleteRule = document.getElementById("delete").value;
       const template = document.getElementById("template").value;
-      const renameFrom = Array.from(
-        document.getElementsByName("rename_from[]")
-      ).map((input) => input.value);
-      const renameTo = Array.from(
-        document.getElementsByName("rename_to[]")
-      ).map((input) => input.value);
+      const renameFrom = Array.from(document.getElementsByName("rename_from[]")).map(input => input.value);
+      const renameTo = Array.from(document.getElementsByName("rename_to[]")).map(input => input.value);
       const output = document.getElementById("output");
       const groupType = document.getElementById("group-type").value;
       const sort = document.getElementById("sort").value;
       const sortType = document.getElementById("sort-type").value;
-
+      
       let rename = {};
       for (let i = 0; i < renameFrom.length; i++) {
         if (renameFrom[i] && renameTo[i]) {
           rename[renameFrom[i]] = renameTo[i];
         }
       }
+      
+      // Only generate link if there is some user input (subscription, proxy, delete, or rename)
+      if (
+        subscription.length === 0 &&
+        proxy.length === 0 &&
+        deleteRule.trim() === "" &&
+        Object.keys(rename).length === 0
+      ) {
+        output.value = "";
+        return;
+      }
+      
+      // Determine base URL using window.location.origin and window.location.pathname
+      let basePath = window.location.pathname;
+      // Remove trailing slash if exists
+      if(basePath.endsWith('/')){
+        basePath = basePath.slice(0, -1);
+      }
+      const baseURL = window.location.origin + basePath;
+      
       const data = {
         subscription,
         proxy,
@@ -255,14 +379,43 @@
         rename,
         "group-type": groupType,
         sort,
-        "sort-type": sortType,
+        "sort-type": sortType
       };
+      output.value = baseURL + "/convert?data=" + encodeBase64(JSON.stringify(data));
+    }
 
-      output.value = `${window.location.origin}/convert?data=${encodeBase64(
-        JSON.stringify(data)
-      )}`;
+    function encodeBase64(str) {
+      return btoa(
+        encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
+          return String.fromCharCode("0x" + p1);
+        })
+      ).replace(/\+/g, "-").replace(/\//g, "_");
+    }
+
+    function openProfileLink() {
+      const output = document.getElementById("output").value;
+      if (output) {
+        window.location.href = "sing-box://import-remote-profile?url=" + encodeURIComponent(output);
+      } else {
+        alert("Output link is empty");
+      }
+    }
+
+    // Integrated copy function for the Generate Link field
+    function copyLink() {
+      const output = document.getElementById("output").value;
+      if (output) {
+        navigator.clipboard.writeText(output)
+          .then(() => {
+            mdui.snackbar({ message: "Link copied!", position: "top" });
+          })
+          .catch(err => {
+            mdui.snackbar({ message: "Failed to copy link!", position: "top" });
+          });
+      } else {
+        mdui.snackbar({ message: "Output link is empty", position: "top" });
+      }
     }
   </script>
 </body>
-
 </html>
