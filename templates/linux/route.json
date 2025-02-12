@@ -38,10 +38,6 @@
         "outbound": "台湾(TW)"
       },
       {
-        "domain_suffix": "online-fix.me",
-        "outbound": "香港(HK)"
-      },
-      {
         "process_path_regex": [
           "^.+/steam/compatibilitytools.d/.+",
           "^.+/steamapps/common/.*"

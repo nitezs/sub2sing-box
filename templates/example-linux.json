@@ -68,15 +68,15 @@
   "inbounds": [
     {
       "type": "tun",
+      "tag": "tun-in",
       "address": [
-        "172.16.0.1/30",
+        "192.168.135.1/30",
         "fdfe:dcba:9876::1/126"
       ],
       "auto_route": true,
       "auto_redirect": true,
       "strict_route": true,
-      "exclude_interface": "tailscale0",
-      "sniff": true
+      "route_exclude_address": "100.64.0.0/10"
     }
   ],
   "outbounds": [
@@ -91,30 +91,29 @@
     {
       "type": "direct",
       "tag": "direct"
-    },
-    {
-      "type": "block",
-      "tag": "block"
-    },
-    {
-      "type": "dns",
-      "tag": "dns"
     }
   ],
   "route": {
     "rules": [
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "protocol": "dns"
-          },
-          {
-            "port": 53
-          }
+        "action": "resolve",
+        "strategy": "prefer_ipv4"
+      },
+      {
+        "action": "sniff",
+        "timeout": "1s"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "port": [
+          3478,
+          5348,
+          5349
         ],
-        "outbound": "dns"
+        "outbound": "direct"
       },
       {
         "ip_is_private": true,
@@ -133,18 +132,23 @@
         "outbound": "default"
       },
       {
-        "type": "logical",
-        "mode": "or",
-        "rules": [
-          {
-            "rule_set": [
-              "geoip-cn",
-              "geosite-geolocation-cn",
-              "geosite-cn",
-              "geosite-category-games@cn",
-              "geosite-steam@cn"
-            ]
-          }
+        "rule_set": "geosite-bahamut",
+        "outbound": "台湾(TW)"
+      },
+      {
+        "process_path_regex": [
+          "^.+/steam/compatibilitytools.d/.+",
+          "^.+/steamapps/common/.*"
+        ],
+        "outbound": "direct"
+      },
+      {
+        "rule_set": [
+          "geoip-cn",
+          "geosite-geolocation-cn",
+          "geosite-cn",
+          "geosite-category-games@cn",
+          "geosite-steam@cn"
         ],
         "outbound": "direct"
       }
@@ -217,6 +221,7 @@
     "clash_api": {
       "external_controller": "127.0.0.1:9090",
       "external_ui": "./ui",
+      "external_ui_download_url": "https://github.com/Zephyruso/zashboard/releases/latest/download/dist.zip",
       "external_ui_download_detour": "default",
       "default_mode": "Enhanced"
     }
