@@ -17,7 +17,7 @@ func init() {
 	RootCmd.AddCommand(runCmd)
 }
 
-+var runCmd = &cobra.Command{
+var runCmd = &cobra.Command{
 	Use:   "server",
 	Long:  "Run the server",
 	Short: "Run the server",
