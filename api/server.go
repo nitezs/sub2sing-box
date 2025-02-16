@@ -15,7 +15,7 @@ import (
 //go:embed static
 var staticFiles embed.FS
 
-func RunServer(port uint16) {
+func RunServer(bind string, port uint16) {
 	tpl, err := template.ParseFS(staticFiles, "static/*")
 	if err != nil {
 		println(err.Error())
@@ -41,8 +41,9 @@ func RunServer(port uint16) {
 
 	r.GET("/convert", handler.Convert)
 
-	fmt.Println("Server is running on port", port)
-	err = r.Run(":" + strconv.Itoa(int(port)))
+	address := bind + ":" + strconv.Itoa(int(port))
+	fmt.Println("Server is running on", address)
+	err = r.Run(address)
 	if err != nil {
 		fmt.Println("Run server failed: ", err)
 	}
